@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+    <!--
+        The first canvas element here displays the computed values.
+        The second canvas element displays a square showing the user's selection for zooming in.
+    -->
+    <div>
+        <canvas id='plot' style='z-index:0;top:0; left:0; position:absolute;'></canvas>    
+        <canvas id='selection' style='z-index:1; top:0; left:0; position:relative;'></canvas>
+    </div>
+
+    <!--
+        These are the forms that allow the user to control the rendering.
+    -->
+    <div>        
+        General Settings: <br />
+        <input type="number" id='numSize' value='100' />
+        <label for='numSize'>Plot Size</label>
+        <br />
+        <input type="number" id='numWorkers' value='8' />
+        <label for='numWorkers'>Number of Web Workers</label>
+        <br />        
+
+        Plot Location: <br />
+        <table>
+            <tr>
+                <td>
+                    <input type='number' id='numMinR' value='-2' />
+                    <label for='numMinR'>Minimum Real Part</label>
+                </td>
+                <td>
+                    <input type='number' id='numMaxR' value='2' />
+                    <label for='numMaxR'>Maximum Real Part</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type='number' id='numMinI' value='-2' />
+                    <label for='numMinI'>Minimum Imaginary Part</label>
+                </td>
+                <td>
+                    <input type='number' id='numMaxI' value='2' />
+                    <label for='numMaxI'>Maximum Imaginary Part</label>
+                </td>
+            </tr>            
+        </table>
+
+        Proposed New Plot Location: <br />
+        <table>
+            <tr>
+                <td>
+                    <input type='number' id='numNewMinR' value='-2' />
+                    <label for='numMinR'>Minimum Real Part</label>
+                </td>
+                <td>
+                    <input type='number' id='numNewMaxR' value='2' />
+                    <label for='numMaxR'>Maximum Real Part</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type='number' id='numNewMinI' value='-2' />
+                    <label for='numMinI'>Minimum Imaginary Part</label>
+                </td>
+                <td>
+                    <input type='number' id='numNewMaxI' value='2' />
+                    <label for='numMaxI'>Maximum Imaginary Part</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id='btnResetPlotLocation' value='Reset Plot Location' />
+                </td>
+                <td></td>
+            </tr>
+        </table>
+
+        Advanced!<br />
+        <input type='number' id='numEscape' value='2' />
+        <label for='numEscape'>Number to escape</label>
+        <br />
+        <input type='number' id='numMaxIterations' value='200' />
+        <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
+        <br />
+
+
+        <input type="button" id='btnDraw' value='Draw!' />
+    </div>
+
+    <div id='divCode' style='position: relative; width:900px; height: 500px;'>
+    </div>
+
+    <script src="Scripts/jquery-1.11.0.min.js"></script>
+    <script src="Scripts/ace/ace.js"></script>
+    <script src="Scripts/SelectWithMouse.js"></script>
+    <script src="Scripts/DrawingFunctions.js"></script>    
+
+    <script>
+
+        // TODO: Keep a stack of coordinates so that the user can revert to a previous selection.
+
+        // Should I try using high-precision libraries to do calculations?
+
+        'use strict';
+        var width, height, editor;        
+
+        editor = ace.edit('divCode');
+        editor.setTheme('ace/theme/monokai');
+        editor.getSession().setMode('ace/mode/javascript');
+
+        function getConfiguration() {
+            var c;
+
+            c = {};
+            c.plotSize = parseInt(document.getElementById('numSize').value);
+            c.numWorkers = parseInt(document.getElementById('numWorkers').value);
+            c.numEscape = parseInt(document.getElementById('numEscape').value);
+            c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
+
+            c.minR = parseFloat(document.getElementById('numNewMinR').value);
+            c.maxR = parseFloat(document.getElementById('numNewMaxR').value);
+            c.minI = parseFloat(document.getElementById('numNewMinI').value);
+            c.maxI = parseFloat(document.getElementById('numNewMaxI').value);
+
+            c.code = editor.getSession().getValue();
+
+            return c;
+        }
+
+        (function () {
+            var configuration, minR, maxR, minI, maxI, worker, limit, max, rgbaArray, plotSize, rowResults;
+            // Draw the image.
+            function drawImage() {
+                var nextRowNumber, workers, farmSize, i;
+                var times = [];
+
+                // Starts at -1 because it gets incremented at the beginning of a loop and should be 0 at the first run.
+                nextRowNumber = -1;                
+                workers = [];                
+
+                configuration = getConfiguration();
+                plotSize = configuration.plotSize;
+                limit = configuration.numEscape;
+                max = configuration.numMaxIterations;                
+                farmSize = configuration.numWorkers;
+
+                // compute the color that corresponds to any value returned from computeRow
+                rgbaArray = [];
+                for (i = 0; i < max; i++) {
+                    rgbaArray.push(drawingFunctions.toRgbaArray(i, max));
+                }                
+                rgbaArray.push(drawingFunctions.toRgbaArray(0, max));
+
+                minR = configuration.minR;
+                maxR = configuration.maxR;
+                minI = configuration.minI;
+                maxI = configuration.maxI;
+
+                // Now that the plot new co-ordinates have been read from the "Proposed New Plot location",
+                // update the form to display the new co-ordinates in the "Plot Location"
+                document.getElementById('numMinR').value = minR;
+                document.getElementById('numMaxR').value = maxR;
+                document.getElementById('numMinI').value = minI;
+                document.getElementById('numMaxI').value = maxI;
+
+                // Set the canvas size to what the user specified.                
+                width = height = plotSize;
+                drawingFunctions.setPlotDimensions(width, height);                
+
+                rowResults = new Array(height);
+
+                for(i = 0; i < farmSize; i++) {       
+                    (function() {             
+                        var worker;
+                        worker = new Worker('computer.js');
+                        nextRowNumber++;
+                        // When we get a message back from the web worker, we expect that it contains the howManyToEscape values
+                        // for a row of pixels in the canvas.
+                        // In the event listener that listens to these messages, we read and display this data.
+                        // Once that's done, check and see if this was the last row, and if it's not, go process the new row.
+                        worker.addEventListener('message', function (e) {
+                            var computedRowNumber, result;
+                            times.push(e.data.time);                            
+                            computedRowNumber = e.data.rowNumber;
+                            result = e.data.result;                            
+                            rowResults[computedRowNumber] = result;
+                            nextRowNumber++;
+                            if (nextRowNumber < height) {
+                                // If there is another row to compute, compute it!
+                                computeNextRowAsync(worker);
+                            }
+                            else {
+                                // If there are no more rows to compute, this worker is done.
+                                // If all workers are done, then it's time to color the pixels to draw the image.
+                                farmSize--;
+                                if (farmSize === 0)
+                                    drawingFunctions.colorPixels(rowResults, rgbaArray);                                                                                                                       
+                            }
+                        }, false);
+                        // Setup the worker with the code specified by the user.
+                        setupWorker(worker);
+                        // Start the worker on the next row.
+                        computeNextRowAsync(worker);                        
+                    })();
+                }                                
+
+                function setupWorker(thisWorker) {
+                    thisWorker.postMessage({
+                        mode: 'setup',
+                        code: configuration.code,
+                        canvasWidth: width,
+                        canvasHeight: height
+                    });
+                }
+
+                function computeNextRowAsync(thisWorker) {
+                    thisWorker.postMessage({
+                        mode: 'computeResult',
+                        canvasWidth: width,
+                        canvasHeight: height,
+                        limit: limit,
+                        max: max,
+                        rowNumber: nextRowNumber,
+                        minR: minR,
+                        maxR: maxR,
+                        minI: minI,
+                        maxI: maxI
+                    });
+                }
+                                
+            }
+
+            // Set up the event handler to allow the user to click to draw the plot.
+            (function() {
+                var btnDraw, btnResetPlotLocation;
+                btnDraw = document.getElementById('btnDraw');
+                btnDraw.onclick = (function(e) {
+                    drawImage();
+                });
+                btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
+                btnResetPlotLocation.onclick = (function(e) {
+                    document.getElementById('numNewMinR').value = '-2';
+                    document.getElementById('numNewMaxR').value = '2';
+                    document.getElementById('numNewMinI').value = '-2';
+                    document.getElementById('numNewMaxI').value = '2';
+                });
+            })();  
+            
+            // Size the plot so that it fits the browser window.
+            document.getElementById('numSize').value = Math.min(window.innerWidth, window.innerHeight);                       
+
+            $.ajax({
+                method: 'GET',
+                url: 'Scripts/ComputationModule.js',
+                dataType: 'text',
+                success: function(response) {
+                    editor.getSession().setValue(response);
+                    drawImage();
+                },
+                error: function(xhr) {                
+                }
+            });            
+        })();                
+    </script>
+</body>
+</html>
