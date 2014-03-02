@@ -18,7 +18,7 @@
             maxR = +maxR;
             minI = +minI;
             maxI = +maxI;
-            
+
             var columnNumber = 0.0, zReal = 0.0, zImaginary = 0.0, numberToEscape = 0;
             var columnNumberInt = 0;
 
@@ -46,13 +46,23 @@
             ar = +r;
             ai = +i;
             for (j = 0; (j | 0) < (max | 0); j = (j + 1) | 0) {
-                computePower(ar, ai, 2);
-                ar = +(r + outR);
-                ai = +(i + outI);
+                iteratingFunction(ar, ai, r, i)
+                ar = outR;
+                ai = outI;
                 if (+(ar * ar + ai * ai) >= +(limit * limit))
                     return j | 0;
             }
             return j | 0;
+        }
+
+        // The iterating function defining the fractal to draw
+        // r and i are the real and imaginary parts of the value from the previous iteration
+        // r0 and i0 are the starting points
+        function iteratingFunction(r, i, r0, i0) {
+            computePower(r, -i, 2);
+            // Set the output from this function to t
+            outR = +(r0 + outR);
+            outI = +(i0 + outI);
         }
 
         // Compute the result of [r,i] raised to the power n.
