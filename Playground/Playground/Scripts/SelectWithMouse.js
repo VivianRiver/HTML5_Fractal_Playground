@@ -1,8 +1,9 @@
-﻿  // Allow the user to select a region with the mouse
-(function () {
+﻿// Allow the user to select a region with the mouse
+
+(function () {    
     'use strict';
     var selectionCanvas, downX, downY, upX, upY, context, isDown, changed;
-    selectionCanvas = document.getElementById('selection');
+    selectionCanvas = document.getElementById('selection');    
     context = selectionCanvas.getContext('2d');
     context.strokeStyle = '#FF0000';
     context.fillStyle = 'rgba(255,0,0,128)';
@@ -11,7 +12,7 @@
 
     selectionCanvas.onmousedown = function (e) {
         switch (e.button) {
-            case 0:                
+            case 0:
                 // Select a square area with the left button.
                 downX = e.layerX;
                 downY = e.layerY;
@@ -21,7 +22,7 @@
                 // toggle the zoom with the middle button
                 if (changed) {
                     drawImage();
-                    context.clearRect(0, 0, width, height);
+                    context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
                     changed = false;
                 }
                 break;
@@ -33,12 +34,12 @@
 
         // The problem here is that all mouse clicks are being read relative to the window, but that's not necessarily relative to the document!!!
         upX = e.layerX;
-        upY = e.layerY;        
+        upY = e.layerY;
 
         // Only draw the square when the user is holding down the button.
         if (e.buttons > 0) {
 
-            context.clearRect(0, 0, width, height);
+            context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
             min = Math.min(upX - downX, upY - downY);
             context.fillStyle = 'rgba(255,0,0,128)';
             context.fillRect(downX, downY, min, min);
@@ -54,7 +55,7 @@
 
         upX = e.layerX;
         upY = e.layerY;
-        context.clearRect(0, 0, width, height);
+        context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
         min = Math.min(upX - downX, upY - downY);
         context.fillStyle = 'rgba(255,0,0,128)';
         context.fillRect(downX, downY, min, min);
@@ -79,12 +80,12 @@
         function convertXToR(x, minR, maxR) {
             var diff;
             diff = maxR - minR;
-            return (diff * x) / width + minR;
+            return (diff * x) / selectionCanvas.width + minR;
         }
         function convertYToI(y, minI, maxI) {
             var diff;
             diff = maxI - minI;
-            return (diff * y) / height + minI;
+            return (diff * y) / selectionCanvas.height + minI;
         }
     }
 })();

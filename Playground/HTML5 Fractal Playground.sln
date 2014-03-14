@@ -1,18 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTML5 Fractal Playground", "Playground\HTML5 Fractal Playground.csproj", "{D485E468-B864-4CA1-B82E-5B845B7E06E7}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Playground", "Playground\", "{747A7475-647D-44AD-BF78-5DFD259C48C2}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/Playground"
+		Debug.AspNetCompiler.PhysicalPath = "Playground\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\Playground\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/Playground"
+		Release.AspNetCompiler.PhysicalPath = "Playground\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\Playground\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "59931"
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D485E468-B864-4CA1-B82E-5B845B7E06E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D485E468-B864-4CA1-B82E-5B845B7E06E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D485E468-B864-4CA1-B82E-5B845B7E06E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D485E468-B864-4CA1-B82E-5B845B7E06E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{747A7475-647D-44AD-BF78-5DFD259C48C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{747A7475-647D-44AD-BF78-5DFD259C48C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
