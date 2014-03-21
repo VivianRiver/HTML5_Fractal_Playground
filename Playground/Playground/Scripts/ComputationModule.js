@@ -1,12 +1,10 @@
 ﻿(function () {
     var computationModule = (function foo1(stdlib, foreign, heap) {
         "use asm";
-        var sqrt, heapArray, outR, outI;
-
-        sqrt = stdlib.Math.sqrt;
-        heapArray = new stdlib.Int32Array(heap);
-        outR = 0.0;
-        outI = 0.0;
+        var sqrt = stdlib.Math.sqrt,
+                        heapArray = new stdlib.Int32Array(heap),
+                        outR = 0.0,
+                        outI = 0.0;
 
         function computeRow(canvasWidth, canvasHeight, limit, max, rowNumber, minR, maxR, minI, maxI) {
             canvasWidth = +canvasWidth;
@@ -59,7 +57,11 @@
         // r and i are the real and imaginary parts of the value from the previous iteration
         // r0 and i0 are the starting points
         function iteratingFunction(r, i, r0, i0) {
-            computePower(r, -i, 2);
+            r = +r;
+            i = +i;
+            r0 = +r0;
+            i0 = +i0;
+            computePower(r, i, 2);
             // Set the output from this function to t
             outR = +(r0 + outR);
             outI = +(i0 + outI);
