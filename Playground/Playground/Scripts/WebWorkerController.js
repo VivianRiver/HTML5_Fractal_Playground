@@ -30,13 +30,6 @@
         max = configuration.numMaxIterations;
         farmSize = configuration.numWorkers;
 
-        // compute the color that corresponds to any value returned from computeRow
-        rgbaArray = [];
-        for (i = 0; i < max; i++) {
-            rgbaArray.push(drawingFunctions.toRgbaArray(i, max));
-        }
-        rgbaArray.push(drawingFunctions.toRgbaArray(0, max));
-
         minR = configuration.minR;
         maxR = configuration.maxR;
         minI = configuration.minI;
@@ -77,7 +70,7 @@
                         // If all workers are done, then it's time to color the pixels to draw the image.
                         farmSize--;
                         if (farmSize === 0)
-                            drawingFunctions.colorPixels(rowResults, rgbaArray);
+                            drawingFunctions.colorPixels(rowResults, configuration.numMaxIterations);
                     }
                     // Update the progress bar with the current progress as a result of the computation being done.
                     setProgress(nextRowNumber, height);
