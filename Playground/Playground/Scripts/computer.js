@@ -16,10 +16,18 @@
                 break;
         }
 
-        function setup() {            
+        function setup() {
             var code, bufferSize;
             code = e.data.code;
-            bufferSize = e.data.canvasWidth * 4;
+            // Buffer size has to be a power of 2 to make asm.js happy.
+            // We want to use the smallest power of 2 that is smaller than 4 times the canvas width.           
+            bufferSize = (function () {
+                var powerOfTwo;
+                powerOfTwo = 1;
+                while (e.data.canvasWidth * 4 >= powerOfTwo)
+                    powerOfTwo *= 2;
+                return powerOfTwo;
+            })();
             heap = new ArrayBuffer(bufferSize);
             computationModule = eval(code);
         }

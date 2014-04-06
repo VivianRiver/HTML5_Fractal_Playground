@@ -4,22 +4,35 @@
 */
 
 window.Form = (function () {
+    'use strict';
     var editor;
 
     // Read the values on the form and return them as a single object.
     function getConfiguration() {
-        var c;
+        var c, avgSize;
 
         c = {};
         c.plotSize = parseInt(document.getElementById('numSize').value);
         c.numWorkers = parseInt(document.getElementById('numWorkers').value);
-        c.numEscape = parseInt(document.getElementById('numEscape').value);
-        c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
 
         c.minR = parseFloat(document.getElementById('numNewMinR').value);
         c.maxR = parseFloat(document.getElementById('numNewMaxR').value);
         c.minI = parseFloat(document.getElementById('numNewMinI').value);
         c.maxI = parseFloat(document.getElementById('numNewMaxI').value);
+
+        c.automaticMaxIterations = document.getElementById('chkAutomaticMaxIterations').checked;
+
+        if (c.automaticMaxIterations) {
+            // If the user has checked the box to automatically determine the maximum number of iterations, compute it here.
+            // This needs a *lot* of work.  I'm just guessing right now.
+            avgSize = (c.maxR - c.minR + c.maxI - c.minI) / 2;
+            document.getElementById('numMaxIterations').value =
+            //  Math.floor(200 / avgSize * 4 );
+                Math.floor(200 * Math.log(8 / avgSize) / Math.log(1.5));
+        }
+
+        c.numEscape = parseInt(document.getElementById('numEscape').value);
+        c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
 
         c.code = editor.getSession().getValue();
 
@@ -39,8 +52,14 @@ window.Form = (function () {
     function setupForm(drawImageFunction) {
         var btnDraw, btnResetPlotLocation, btnSave;
 
+        // We were passed in a function that draws the image, but we need to tell the image drawing function
+        // how to display the drawing progress.
+        function curriedDrawImageFunction() {
+            drawImageFunction(setProgress);
+        }
+
         btnDraw = document.getElementById('btnDraw');
-        btnDraw.onclick = drawImageFunction;
+        btnDraw.onclick = curriedDrawImageFunction;
 
         btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
         btnResetPlotLocation.onclick = (function (e) {
@@ -71,11 +90,18 @@ window.Form = (function () {
             dataType: 'text',
             success: function (response) {
                 editor.getSession().setValue(response);
-                drawImageFunction();
+                curriedDrawImageFunction();
             },
             error: function (xhr) {
             }
         });
+    }
+
+    function setProgress(current, max) {        
+        var progress;
+        progress = document.getElementById('progress');
+        progress.value = current;
+        progress.max = max;
     }
 
     return {

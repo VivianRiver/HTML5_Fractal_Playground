@@ -2,9 +2,9 @@
     var computationModule = (function foo1(stdlib, foreign, heap) {
         "use asm";
         var sqrt = stdlib.Math.sqrt,
-                        heapArray = new stdlib.Int32Array(heap),
-                        outR = 0.0,
-                        outI = 0.0;
+            heapArray = new stdlib.Int32Array(heap),
+            outR = 0.0,
+            outI = 0.0;
 
         function computeRow(canvasWidth, canvasHeight, limit, max, rowNumber, minR, maxR, minI, maxI) {
             canvasWidth = +canvasWidth;

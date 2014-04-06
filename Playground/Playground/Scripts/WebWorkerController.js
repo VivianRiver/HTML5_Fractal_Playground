@@ -10,12 +10,13 @@
 
 
 (function () {
-    var configuration, minR, maxR, minI, maxI, worker, limit, max, rgbaArray, plotSize, rowResults;
+    var configuration, minR, maxR, minI, maxI, limit, max, rgbaArray, plotSize, rowResults;
 
     Form.setupForm(drawImage);
 
     // Draw the image.
-    function drawImage() {
+    // setProgress is a function passed in that allows drawImage to update the progress bar on the screen.
+    function drawImage(setProgress) {
         var nextRowNumber, workers, farmSize, i;
         var times = [];
 
@@ -78,6 +79,8 @@
                         if (farmSize === 0)
                             drawingFunctions.colorPixels(rowResults, rgbaArray);
                     }
+                    // Update the progress bar with the current progress as a result of the computation being done.
+                    setProgress(nextRowNumber, height);
                 }, false);
                 // Setup the worker with the code specified by the user.
                 setupWorker(worker);

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-    <title></title>
+    <title>HTML5 Fractal Playground 1.0.1</title>
 </head>
 <body>
 
@@ -15,10 +15,19 @@
         <canvas id='selection' style='z-index:1; top:0; left:0; position:relative;'></canvas>
     </div>
 
+    <div>
+        <div style='float:left;'>
+            <input type="button" id='btnDraw' value='Draw!' />
+            <input type="button" id='btnSave' value='Save' />
+        </div>
+        Progress:
+        <progress id='progress' value='0'></progress>
+    </div>
+
     <!--
         These are the forms that allow the user to control the rendering.
     -->
-    <div>        
+    <div style='clear:both;'>        
         General Settings: <br />
         <input type="number" id='numSize' value='100' />
         <label for='numSize'>Plot Size</label>
@@ -51,7 +60,7 @@
             </tr>            
         </table>
 
-        Proposed New Plot Location: <br />
+        Proposed New Plot Location: (Draw a square on the canvas with the mouse) <br />
         <table>
             <tr>
                 <td>
@@ -88,10 +97,9 @@
         <input type='number' id='numMaxIterations' value='200' />
         <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
         <br />
-
-
-        <input type="button" id='btnDraw' value='Draw!' />
-        <input type="button" id='btnSave' value='Save' />
+        <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
+        <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
+        <br />        
     </div>
 
     <div id='divCode' style='position: relative; width:900px; height: 500px;'>
@@ -115,6 +123,8 @@
     <script src="Scripts/WebWorkerController.js" charset="utf-8"></script>           
     <!--
         // TODO: Keep a stack of coordinates so that the user can revert to a previous selection.
+        // This could be done with relative ease by making the coordinates part of a hash-bang URL and using the back and forward buttons.
+
         // TODO: High precision calculations        
     -->
     <script>
