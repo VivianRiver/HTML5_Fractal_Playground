@@ -50,32 +50,60 @@ window.Form = (function () {
     // Since the form interaction module does not contain the functions to draw,
     // a handler to this function must be passed in.
     function setupForm(drawImageFunction) {
-        var btnDraw, btnResetPlotLocation, btnSave;
+        var btnOptions, btnDraw, btnResetPlotLocation, btnSave;
 
-        // We were passed in a function that draws the image, but we need to tell the image drawing function
-        // how to display the drawing progress.
-        function curriedDrawImageFunction() {
-            drawImageFunction(setProgress);
+        // Set up the [Draw] button so that the user can click to draw the image.
+        // The user may also draw the image by pressing the [D] key.
+        btnDraw = document.getElementById('btnDraw');
+        btnDraw.onclick = drawImageFunction;
+        $(document).keypress(function (e) {                        
+            if (e.charCode === 100 /* [D] */)
+                drawImageFunction();
+        });
+
+        // Set up the [Save] button to allow for the image to be saved to disk.
+        // The user may also save the image by pressing the [S] key.
+        btnSave = document.getElementById('btnSave');
+        btnSave.onclick = saveImageFunction;
+        $(document).keypress(function (e) {
+            if (e.charCode === 115 /* [S] */)
+                saveImageFunction();
+        });
+
+        function saveImageFunction() {
+            var plot;
+            plot = document.getElementById('plot');
+            plot.toBlob(function (image) {
+                saveAs(image);
+            });
         }
 
-        btnDraw = document.getElementById('btnDraw');
-        btnDraw.onclick = curriedDrawImageFunction;
+        // Set up the [Options] button so that the user can see the options form when he clicks it.
+        // The user may also open the form by pression the [O] key.
+        btnOptions = document.getElementById('btnOptions');
+        btnOptions.onclick = showOptionsDialog;
+        $(document).keypress(function (e) {
+            if (e.charCode === 111 /* [O] */)
+                showOptionsDialog();
+        });
 
+        function showOptionsDialog() {
+            // Set up the jQuery-UI dialog with the form elements.
+            $('#form').dialog({
+                title: 'Options',
+                modal: false,
+                width: 700
+            });
+
+        }
+
+        // Set up the [Reset Plot Location] button so that we return to the original coordinates when it is clicked.
         btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
         btnResetPlotLocation.onclick = (function (e) {
             document.getElementById('numNewMinR').value = '-2';
             document.getElementById('numNewMaxR').value = '2';
             document.getElementById('numNewMinI').value = '-2';
             document.getElementById('numNewMaxI').value = '2';
-        });
-
-        btnSave = document.getElementById('btnSave');
-        btnSave.onclick = (function (e) {
-            var plot;
-            plot = document.getElementById('plot');
-            plot.toBlob(function (image) {
-                saveAs(image);
-            });
         });
 
         // Set up the ACE editor that allows the user to modify the Javascript.
@@ -90,18 +118,11 @@ window.Form = (function () {
             dataType: 'text',
             success: function (response) {
                 editor.getSession().setValue(response);
-                curriedDrawImageFunction();
+                drawImageFunction();
             },
             error: function (xhr) {
             }
         });
-    }
-
-    function setProgress(current, max) {        
-        var progress;
-        progress = document.getElementById('progress');
-        progress.value = current;
-        progress.max = max;
     }
 
     return {

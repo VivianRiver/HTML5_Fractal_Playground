@@ -2,7 +2,13 @@
 
 <html>
 <head>
-    <title>HTML5 Fractal Playground 1.0.1</title>
+    <title>HTML5 Fractal Playground 1.2.0</title>
+    <link rel="Stylesheet" href="Styles/Playground.css" />
+    <link rel="Stylesheet" href="Styles/jquery-ui-1.10.4.min.css" />
+
+    <script src="Scripts/jquery-1.11.0.min.js" charset="utf-8"></script>
+    <script src="Scripts/jquery-ui-1.10.4.min.js" charset="utf-8"></script>
+    <script src="Scripts/ace/ace.js" charset="utf-8"></script>    
 </head>
 <body>
 
@@ -13,102 +19,92 @@
     <div>
         <canvas id='plot' style='z-index:0;top:0; left:0; position:absolute;'></canvas>    
         <canvas id='selection' style='z-index:1; top:0; left:0; position:relative;'></canvas>
+        <span style='z-index:2; top:0; left:0; position: absolute;'>            
+            <!-- [Draw] button -->
+            <button id='btnDraw' ><u>D</u>raw</button> 
+            <!-- [Save] button -->
+            <button id='btnSave'><u>S</u>ave</button>
+            <!-- [Options] button -->
+            <button id='btnOptions'><u>O</u>ptions</button>
+        </span>
     </div>
 
-    <div>
-        <div style='float:left;'>
-            <input type="button" id='btnDraw' value='Draw!' />
-            <input type="button" id='btnSave' value='Save' />
-        </div>
-        Progress:
-        <progress id='progress' value='0'></progress>
-    </div>
+    <div id='form' class='dialog'>
+        <!--
+            These are the forms that allow the user to control the rendering.
+        -->
+        <div>        
+            General Settings: <br />
+            <input type="number" id='numSize' value='100' />
+            <label for='numSize'>Plot Size</label>
+            <br />
+            <input type="number" id='numWorkers' value='8' />
+            <label for='numWorkers'>Number of Web Workers</label>
+            <br />        
 
-    <!--
-        These are the forms that allow the user to control the rendering.
-    -->
-    <div style='clear:both;'>        
-        General Settings: <br />
-        <input type="number" id='numSize' value='100' />
-        <label for='numSize'>Plot Size</label>
-        <br />
-        <input type="number" id='numWorkers' value='8' />
-        <label for='numWorkers'>Number of Web Workers</label>
-        <br />        
-
-        Plot Location: <br />
-        <table>
-            <tr>
-                <td>
+            <div class='Section'>
+                Plot Location: <br />            
+                <div class='North'>
+                    <label for='numMaxI'>Maximum Imaginary Part</label> <br />
+                    <input type='number' id='numMaxI' value='2' />                
+                </div>                        
+                <div class='West'>
+                    <label for='numMinR'>Minimum Real Part</label> <br />
                     <input type='number' id='numMinR' value='-2' />
-                    <label for='numMinR'>Minimum Real Part</label>
-                </td>
-                <td>
-                    <input type='number' id='numMaxR' value='2' />
-                    <label for='numMaxR'>Maximum Real Part</label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type='number' id='numMinI' value='-2' />
-                    <label for='numMinI'>Minimum Imaginary Part</label>
-                </td>
-                <td>
-                    <input type='number' id='numMaxI' value='2' />
-                    <label for='numMaxI'>Maximum Imaginary Part</label>
-                </td>
-            </tr>            
-        </table>
+                </div>
+                <div class='East'>
+                    <label for='numMaxR'>Maximum Real Part</label> <br />
+                    <input type='number' id='numMaxR' value='2' />                
+                </div>
+                <div class='South'>
+                    <label for='numMinI'>Minimum Imaginary Part</label> <br />
+                    <input type='number' id='numMinI' value='-2' /> 
+                </div>            
+            </div>
 
-        Proposed New Plot Location: (Draw a square on the canvas with the mouse) <br />
-        <table>
-            <tr>
-                <td>
-                    <input type='number' id='numNewMinR' value='-2' />
-                    <label for='numMinR'>Minimum Real Part</label>
-                </td>
-                <td>
-                    <input type='number' id='numNewMaxR' value='2' />
-                    <label for='numMaxR'>Maximum Real Part</label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type='number' id='numNewMinI' value='-2' />
-                    <label for='numMinI'>Minimum Imaginary Part</label>
-                </td>
-                <td>
-                    <input type='number' id='numNewMaxI' value='2' />
-                    <label for='numMaxI'>Maximum Imaginary Part</label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="button" id='btnResetPlotLocation' value='Reset Plot Location' />
-                </td>
-                <td></td>
-            </tr>
-        </table>
+            <div class='Section'>
+                Proposed New Plot Location: <br />
+                (Draw a square on the canvas with the mouse) <br />
+                <div class='North'>
+                    <label for='numMaxI'>Maximum Imaginary Part</label> <br />
+                    <input type='number' id='numNewMaxI' value='2' />                    
+                </div>                        
+                <div class='West'>
+                    <label for='numMinR'>Minimum Real Part</label> <br />
+                    <input type='number' id='numNewMinR' value='-2' />                        
+                </div>
+                <div class='East'>
+                    <label for='numMaxR'>Maximum Real Part</label> <br />
+                    <input type='number' id='numNewMaxR' value='2' />                    
+                </div>
+                <div class='South'>
+                    <label for='numMinI'>Minimum Imaginary Part</label> <br />
+                    <input type='number' id='numNewMinI' value='-2' />                    
+                </div>            
+            </div> <!-- end section -->
+           
+            <input type="button" id='btnResetPlotLocation' value='Reset Plot Location' /> <br />
 
-        Advanced!<br />
-        <input type='number' id='numEscape' value='2' />
-        <label for='numEscape'>Number to escape</label>
-        <br />
-        <input type='number' id='numMaxIterations' value='200' />
-        <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
-        <br />
-        <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
-        <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
-        <br />        
-    </div>
+            Advanced!<br />
+            <input type='number' id='numEscape' value='2' />
+            <label for='numEscape'>Number to escape</label>
+            <br />
+            <input type='number' id='numMaxIterations' value='200' />
+            <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
+            <br />
+            <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
+            <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
+            <br />        
+        </div>
 
-    <div id='divCode' style='position: relative; width:900px; height: 500px;'>
-    </div>
+        <div id='divCode' style='position: relative; width:900px; height: 500px;'>
+        </div>
 
+    </div> <!-- end form -->
     
-
-    <script src="Scripts/jquery-1.11.0.min.js" charset="utf-8"></script>
-    <script src="Scripts/ace/ace.js" charset="utf-8"></script>
+    <div id='ProgressDialog' class='dialog'>
+        <progress id='progress'></progress>
+    </div>    
 
     <!--
         The following two scripts implement functionality to save the contents of the canvas in browsers
@@ -117,18 +113,20 @@
     <script src="Scripts/canvas-toBlob.js" charset="utf-8"></script>
     <script src="Scripts/FileSaver.js" charset="utf-8"></script>
 
+    <script src="Scripts/Progress.js" charset="utf-8"></script>
     <script src="Scripts/Form.js" charset="utf-8"></script>
     <script src="Scripts/SelectWithMouse.js" charset="utf-8"></script>        
     <script src="Scripts/DrawingFunctions.js" charset="utf-8"></script>     
     <script src="Scripts/WebWorkerController.js" charset="utf-8"></script>           
     <!--
-        // TODO: Keep a stack of coordinates so that the user can revert to a previous selection.
-        // This could be done with relative ease by making the coordinates part of a hash-bang URL and using the back and forward buttons.
+         TODO: Keep a stack of coordinates so that the user can revert to a previous selection.
+         This could be done with relative ease by making the coordinates part of a hash-bang URL and using the back and forward buttons.
 
-        // TODO: High precision calculations        
+         TODO: High precision calculations        
     -->
-    <script>
-        
-    </script>
+
+    <!--
+        TODO: Is there some practical way to determine the appropriate number of web workers?
+    -->    
 </body>
 </html>

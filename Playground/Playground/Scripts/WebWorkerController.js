@@ -15,8 +15,7 @@
     Form.setupForm(drawImage);
 
     // Draw the image.
-    // setProgress is a function passed in that allows drawImage to update the progress bar on the screen.
-    function drawImage(setProgress) {
+    function drawImage() {
         var nextRowNumber, workers, farmSize, i;
         var times = [];
 
@@ -45,6 +44,7 @@
 
         rowResults = new Array(height);
 
+        Progress.showProgress();
         for (i = 0; i < farmSize; i++) {
             (function () {
                 var worker;
@@ -69,11 +69,13 @@
                         // If there are no more rows to compute, this worker is done.
                         // If all workers are done, then it's time to color the pixels to draw the image.
                         farmSize--;
-                        if (farmSize === 0)
+                        if (farmSize === 0) {
                             drawingFunctions.colorPixels(rowResults, configuration.numMaxIterations);
+                            Progress.hideProgress();
+                        }
                     }
                     // Update the progress bar with the current progress as a result of the computation being done.
-                    setProgress(nextRowNumber, height);
+                    Progress.setProgress(nextRowNumber, height);
                 }, false);
                 // Setup the worker with the code specified by the user.
                 setupWorker(worker);

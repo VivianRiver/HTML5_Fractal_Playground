@@ -1,0 +1,40 @@
+﻿body 
+{    
+    overflow: hidden;
+}
+
+.dialog
+{
+    display: none;   
+}
+
+.Section 
+{
+    border: 1px solid gray;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.North
+{
+    clear: both;
+    text-align: center;   
+}
+
+.West
+{
+    float: left;
+    text-align: center;
+}
+
+.East
+{
+    float: right;
+    text-align: center;
+}
+
+.South
+{
+    clear: both;
+    text-align: center;   
+}
