@@ -44,7 +44,7 @@
 
         rowResults = new Array(height);
 
-        Progress.showProgress();
+        Progress.showProgress('Drawing Image...', null);
         for (i = 0; i < farmSize; i++) {
             (function () {
                 var worker;

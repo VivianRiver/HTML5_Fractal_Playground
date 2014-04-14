@@ -5,11 +5,11 @@
 
 window.Form = (function () {
     'use strict';
-    var editor;
+    var editor, computationModuleCode;
 
     // Read the values on the form and return them as a single object.
     function getConfiguration() {
-        var c, avgSize;
+        var c, avgSize, iteratingFunctionString;
 
         c = {};
         c.plotSize = parseInt(document.getElementById('numSize').value);
@@ -34,7 +34,16 @@ window.Form = (function () {
         c.numEscape = parseInt(document.getElementById('numEscape').value);
         c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
 
-        c.code = editor.getSession().getValue();
+        iteratingFunctionString = (function () {
+            var fractalIndex, retval;
+            fractalIndex = parseInt(document.getElementById('selFractal').value);
+            retval = IteratingFunctions[fractalIndex].iteratingFunction.toString();
+            retval = retval.replace(new RegExp('function \\('), 'function iteratingFunction (');
+            return retval;
+        })();
+
+        c.code = computationModuleCode
+            .replace(new RegExp('"ITERATINGFUNCTION"'), iteratingFunctionString)
 
         return c;
     }
@@ -50,13 +59,13 @@ window.Form = (function () {
     // Since the form interaction module does not contain the functions to draw,
     // a handler to this function must be passed in.
     function setupForm(drawImageFunction) {
-        var btnOptions, btnDraw, btnResetPlotLocation, btnSave;
+        var i, btnDraw, btnSave, btnOptions, selFractal, $option, btnResetPlotLocation;
 
         // Set up the [Draw] button so that the user can click to draw the image.
         // The user may also draw the image by pressing the [D] key.
         btnDraw = document.getElementById('btnDraw');
         btnDraw.onclick = drawImageFunction;
-        $(document).keypress(function (e) {                        
+        $(document).keypress(function (e) {
             if (e.charCode === 100 /* [D] */)
                 drawImageFunction();
         });
@@ -79,7 +88,7 @@ window.Form = (function () {
         }
 
         // Set up the [Options] button so that the user can see the options form when he clicks it.
-        // The user may also open the form by pression the [O] key.
+        // The user may also open the form by pressing the [O] key.
         btnOptions = document.getElementById('btnOptions');
         btnOptions.onclick = showOptionsDialog;
         $(document).keypress(function (e) {
@@ -97,32 +106,62 @@ window.Form = (function () {
 
         }
 
+        // Set up the iterating function selection so that the user can choose a fractal.
+        // The iterating functions are defined in the file IteratingFunctions.js
+        selFractal = document.getElementById('selFractal');
+        for (i = 0; i < IteratingFunctions.length; i++) {
+            $option = $('<option>', {
+                value: i.toString()
+            }).html(IteratingFunctions[i].name);
+            $(selFractal).append($option);
+        }
+
         // Set up the [Reset Plot Location] button so that we return to the original coordinates when it is clicked.
+        // The user may also reset the plot location by pressing the [R] key.
         btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
-        btnResetPlotLocation.onclick = (function (e) {
+        btnResetPlotLocation.onclick = resetPlotLocation;
+        $(document).keypress(function (e) {
+            if (e.charCode === 82 /* [R] */)
+                showOptionsDialog();
+        });
+
+        function resetPlotLocation() {
             document.getElementById('numNewMinR').value = '-2';
             document.getElementById('numNewMaxR').value = '2';
             document.getElementById('numNewMinI').value = '-2';
             document.getElementById('numNewMaxI').value = '2';
+            // Draw the image again with these new coordinates.
+            drawImageFunction();
+        }
+
+
+        // Estimate the number of cores in the user's CPU and put it in the "Number of Web Workers" input.
+        // Once that is done, get the ComputationModule script 
+        Progress.showProgress('Setup', 'Estimating the number of cores in your CPU...')
+        Progress.setProgress(-1);
+        navigator.getCores(function (numCores) {
+            Progress.hideProgress();
+            document.getElementById('numWorkers').value = numCores.toString();
+
+            // The estimation is done, so proceed to load the script and invoke the drawImageHandler when that's done.            
+            $.ajax({
+                method: 'GET',
+                url: 'Scripts/ComputationModule.js',
+                dataType: 'text',
+                success: function (response) {
+                    computationModuleCode = response;
+                    drawImageFunction();
+                },
+                error: function (xhr) {
+                }
+            });
         });
+
 
         // Set up the ACE editor that allows the user to modify the Javascript.
         editor = ace.edit('divCode');
         editor.setTheme('ace/theme/monokai');
         editor.getSession().setMode('ace/mode/javascript');
-
-        // Load the Javascript asynchronously, and when it's done, invoke the drawImageHandler.
-        $.ajax({
-            method: 'GET',
-            url: 'Scripts/ComputationModule.js',
-            dataType: 'text',
-            success: function (response) {
-                editor.getSession().setValue(response);
-                drawImageFunction();
-            },
-            error: function (xhr) {
-            }
-        });
     }
 
     return {

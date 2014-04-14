@@ -2,7 +2,7 @@
 
 <html>
 <head>
-    <title>HTML5 Fractal Playground 1.2.0</title>
+    <title>HTML5 Fractal Playground 1.2.1</title>
     <link rel="Stylesheet" href="Styles/Playground.css" />
     <link rel="Stylesheet" href="Styles/jquery-ui-1.10.4.min.css" />
 
@@ -26,6 +26,10 @@
             <button id='btnSave'><u>S</u>ave</button>
             <!-- [Options] button -->
             <button id='btnOptions'><u>O</u>ptions</button>
+            <!-- Fractal Selection -->
+            <select id='selFractal'></select>
+            <!-- [Reset Plot Location] button -->
+            <button id='btnResetPlotLocation'><u>R</u>eset Plot Location</button>
         </span>
     </div>
 
@@ -38,7 +42,7 @@
             <input type="number" id='numSize' value='100' />
             <label for='numSize'>Plot Size</label>
             <br />
-            <input type="number" id='numWorkers' value='8' />
+            <input type="number" id='numWorkers' value='1' />
             <label for='numWorkers'>Number of Web Workers</label>
             <br />        
 
@@ -81,9 +85,7 @@
                     <label for='numMinI'>Minimum Imaginary Part</label> <br />
                     <input type='number' id='numNewMinI' value='-2' />                    
                 </div>            
-            </div> <!-- end section -->
-           
-            <input type="button" id='btnResetPlotLocation' value='Reset Plot Location' /> <br />
+            </div> <!-- end section -->                       
 
             Advanced!<br />
             <input type='number' id='numEscape' value='2' />
@@ -97,12 +99,18 @@
             <br />        
         </div>
 
-        <div id='divCode' style='position: relative; width:900px; height: 500px;'>
+        <!--
+            I am not using this for now, but I *will* use it later.        
+        -->
+        <div style='display:none;' id='divCode' <!--style='position: relative; width:900px; height: 500px;'-->>
         </div>
+        
 
     </div> <!-- end form -->
     
     <div id='ProgressDialog' class='dialog'>
+        <div id='divProgressDescription'></div>
+        <br />
         <progress id='progress'></progress>
     </div>    
 
@@ -113,20 +121,24 @@
     <script src="Scripts/canvas-toBlob.js" charset="utf-8"></script>
     <script src="Scripts/FileSaver.js" charset="utf-8"></script>
 
+    <!--
+        The next script is from GitHub: https://github.com/oftn/core-estimator
+        It provides functionality to guess at how many cores are in the user's computer.
+    -->
+    <script src="Scripts/core-estimator/core-estimator.js" charset="utf-8"></script>
+
     <script src="Scripts/Progress.js" charset="utf-8"></script>
     <script src="Scripts/Form.js" charset="utf-8"></script>
+    <script src="Scripts/IteratingFunctions.js" charset="utf-8"></script>
     <script src="Scripts/SelectWithMouse.js" charset="utf-8"></script>        
     <script src="Scripts/DrawingFunctions.js" charset="utf-8"></script>     
-    <script src="Scripts/WebWorkerController.js" charset="utf-8"></script>           
+    <script src="Scripts/WebWorkerController.js" charset="utf-8"></script>     
     <!--
          TODO: Keep a stack of coordinates so that the user can revert to a previous selection.
          This could be done with relative ease by making the coordinates part of a hash-bang URL and using the back and forward buttons.
 
          TODO: High precision calculations        
     -->
-
-    <!--
-        TODO: Is there some practical way to determine the appropriate number of web workers?
-    -->    
+   
 </body>
 </html>

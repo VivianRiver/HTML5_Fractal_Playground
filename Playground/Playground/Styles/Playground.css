@@ -38,3 +38,9 @@
     clear: both;
     text-align: center;   
 }
+
+/* A class to use on jQuery-UI dialog boxes where we want no "close" button */
+.no-close .ui-dialog-titlebar-close 
+{
+    display: none 
+}

@@ -53,19 +53,15 @@
             return j | 0;
         }
 
+        // This file is loaded via AJAX and the string below will be replaced with an actual iterating function.
         // The iterating function defining the fractal to draw
         // r and i are the real and imaginary parts of the value from the previous iteration
         // r0 and i0 are the starting points
-        function iteratingFunction(r, i, r0, i0) {
-            r = +r;
-            i = +i;
-            r0 = +r0;
-            i0 = +i0;
-            computePower(r, i, 2);
-            // Set the output from this function to t
-            outR = +(r0 + outR);
-            outI = +(i0 + outI);
-        }
+        // It is expected that this file will actually be fetched by AJAX at which point,
+        // the string below, will be replaced with code to implement
+        // a particular iterating function.
+        "ITERATINGFUNCTION"
+        
 
         // Compute the result of [r,i] raised to the power n.
         // Place the resulting real part in outR and the imaginary part in outI.

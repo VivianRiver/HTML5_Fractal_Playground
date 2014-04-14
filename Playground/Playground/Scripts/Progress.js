@@ -1,5 +1,5 @@
 ﻿/*
-    Provide the "Progress" Javascript object, which is used to display progress to the user as images are drawn.
+    Provide the "Progress" Javascript object, which is used to display progress to the user as tasks are completed, such as drawing images.
 */
 
 (function () {
@@ -15,10 +15,13 @@
     // Attach the progress object to the window to make it globally available.
     window.Progress = progress;
 
-    function showProgress() {
-        $('#ProgressDialog').dialog({            
+    function showProgress(title, body) {
+        $('#divProgressDescription').html(body);
+        $('#ProgressDialog').dialog({
             modal: true,
-            title: 'Drawing Image'
+            title: title,
+            closeOnEscape: false,
+            dialogClass: 'no-close'
         });
     }
 
@@ -28,7 +31,7 @@
             .attr('max', max)
     }
 
-    function hideProgress() {        
+    function hideProgress() {
         $('#ProgressDialog').dialog('close');
     }
 })();

@@ -37,6 +37,12 @@
                 else
                     rgba = rgbaArray[value];
 
+                // I get an error sometimes where is says "rgba is undefined".  This little bit of code is meant to catch that so I can figure it out.
+                if (!rgba) {
+                    alert('An error occurred.\nPlease try the operation again.');
+                    debugger;
+                }
+
                 redIndex = (rowNumber * width + columnNumber) * 4;
                 // Red
                 imageData.data[redIndex] = rgba[0];
@@ -67,7 +73,7 @@
         for (i = 0; i < max; i++) {
             array.push(toRgbaArray(i, min, max));
         }
-//        array.push(toRgbaArray(0, min, max));
+        //        array.push(toRgbaArray(0, min, max));
 
         return array;
     }
