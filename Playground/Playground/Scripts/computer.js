@@ -19,11 +19,11 @@
         function setup() {
             var code, bufferSize;
             code = e.data.code;
-            // Buffer size has to be a power of 2 to make asm.js happy.
-            // We want to use the smallest power of 2 that is smaller than 4 times the canvas width.           
+            // Buffer size has to be a power of 2 at least 4096 to make asm.js happy.
+            // We want to use the smallest power of 2 that is smaller than 4 times the canvas width and at least 4096
             bufferSize = (function () {
                 var powerOfTwo;
-                powerOfTwo = 1;
+                powerOfTwo = 4096;
                 while (e.data.canvasWidth * 4 >= powerOfTwo)
                     powerOfTwo *= 2;
                 return powerOfTwo;

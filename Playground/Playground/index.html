@@ -2,7 +2,7 @@
 
 <html>
 <head>
-    <title>HTML5 Fractal Playground 1.2.1</title>
+    <title>HTML5 Fractal Playground 1.2.2</title>
     <link rel="Stylesheet" href="Styles/Playground.css" />
     <link rel="Stylesheet" href="Styles/jquery-ui-1.10.4.min.css" />
 
@@ -30,6 +30,8 @@
             <select id='selFractal'></select>
             <!-- [Reset Plot Location] button -->
             <button id='btnResetPlotLocation'><u>R</u>eset Plot Location</button>
+            <!-- [Full Screen] button -->
+            <button id='btnFullScreen'><u>F</u>ull Screen</button>
         </span>
     </div>
 
@@ -41,6 +43,9 @@
             General Settings: <br />
             <input type="number" id='numSize' value='100' />
             <label for='numSize'>Plot Size</label>
+            <br />
+            <input type='checkbox' id='chkAutoPlotSize' checked="checked" />
+            <label for='chkAutoPlotSize'>Automatically adjust to window size?</label>
             <br />
             <input type="number" id='numWorkers' value='1' />
             <label for='numWorkers'>Number of Web Workers</label>
@@ -102,7 +107,7 @@
         <!--
             I am not using this for now, but I *will* use it later.        
         -->
-        <div style='display:none;' id='divCode' <!--style='position: relative; width:900px; height: 500px;'-->>
+        <div id='divCode' style='position: relative; width:900px; height: 500px; display:none;'>
         </div>
         
 
@@ -127,18 +132,14 @@
     -->
     <script src="Scripts/core-estimator/core-estimator.js" charset="utf-8"></script>
 
-    <script src="Scripts/Progress.js?version=1.2.1" charset="utf-8"></script>
-    <script src="Scripts/Form.js?version=1.2.1" charset="utf-8"></script>
-    <script src="Scripts/IteratingFunctions.js?version=1.2.1" charset="utf-8"></script>
-    <script src="Scripts/SelectWithMouse.js?version=1.2.1" charset="utf-8"></script>        
-    <script src="Scripts/DrawingFunctions.js?version=1.2.1" charset="utf-8"></script>     
-    <script src="Scripts/WebWorkerController.js?version=1.2.1" charset="utf-8"></script>     
-    <script src="Scripts/Progress-1.2.js" charset="utf-8"></script>
-    <script src="Scripts/Form-1.2.js" charset="utf-8"></script>
-    <script src="Scripts/IteratingFunctions-1.2.js" charset="utf-8"></script>
-    <script src="Scripts/SelectWithMouse.js" charset="utf-8"></script>        
-    <script src="Scripts/DrawingFunctions-1.2.js" charset="utf-8"></script>     
-    <script src="Scripts/WebWorkerController.js" charset="utf-8"></script>     
+    <script src="Scripts/Progress.js?version=1.2.2" charset="utf-8"></script>
+    <script src="Scripts/Form.js?version=1.2.2" charset="utf-8"></script>
+    <script src="Scripts/IteratingFunctions.js?version=1.2.2" charset="utf-8"></script>
+    <script src="Scripts/SelectWithMouse.js?version=1.2.2" charset="utf-8"></script>        
+    <script src="Scripts/DrawingFunctions.js?version=1.2.2" charset="utf-8"></script>     
+    <script src="Scripts/WebWorkerController.js?version=1.2.2" charset="utf-8"></script>         
+    <script src="Scripts/SelectWithMouse.js" charset="utf-8"></script>            
+    <script src="Scripts/FullScreen.js?version=1.2.2" charset="utf-8"></script>
     <!--
          TODO: Keep a stack of coordinates so that the user can revert to a previous selection.
          This could be done with relative ease by making the coordinates part of a hash-bang URL and using the back and forward buttons.

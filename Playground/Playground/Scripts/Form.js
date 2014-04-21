@@ -12,7 +12,14 @@ window.Form = (function () {
         var c, avgSize, iteratingFunctionString;
 
         c = {};
+                
+        c.automaticPlotSize = document.getElementById('chkAutoPlotSize').checked;
+        if (c.automaticPlotSize) {
+            // If the user has checked the box to automatically determine the plot size based on the window size, compute it here.
+            Form.setPlotSizeByWindowSize();
+        }
         c.plotSize = parseInt(document.getElementById('numSize').value);
+
         c.numWorkers = parseInt(document.getElementById('numWorkers').value);
 
         c.minR = parseFloat(document.getElementById('numNewMinR').value);
@@ -26,13 +33,19 @@ window.Form = (function () {
             // If the user has checked the box to automatically determine the maximum number of iterations, compute it here.
             // This needs a *lot* of work.  I'm just guessing right now.
             avgSize = (c.maxR - c.minR + c.maxI - c.minI) / 2;
-            document.getElementById('numMaxIterations').value =
-            //  Math.floor(200 / avgSize * 4 );
-                Math.floor(200 * Math.log(8 / avgSize) / Math.log(1.5));
+            document.getElementById('numMaxIterations').value = (function () {
+                var value;
+                //  Math.floor(200 / avgSize * 4 );
+                value = Math.floor(200 * Math.log(8 / avgSize) / Math.log(1.5));
+                if (value === Infinity)
+                    value = 2147483647;
+                return value;
+            })();
         }
+        c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
 
         c.numEscape = parseInt(document.getElementById('numEscape').value);
-        c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
+        
 
         iteratingFunctionString = (function () {
             var fractalIndex, retval;
@@ -48,6 +61,11 @@ window.Form = (function () {
         return c;
     }
 
+    // Size the plot so that it fits the browser window.
+    function setPlotSizeByWindowSize() {
+        document.getElementById('numSize').value = Math.min(window.innerWidth, window.innerHeight);
+    }
+
     function setPlotCoordinates(minR, maxR, minI, maxI) {
         document.getElementById('numMinR').value = minR;
         document.getElementById('numMaxR').value = maxR;
@@ -59,7 +77,7 @@ window.Form = (function () {
     // Since the form interaction module does not contain the functions to draw,
     // a handler to this function must be passed in.
     function setupForm(drawImageFunction) {
-        var i, btnDraw, btnSave, btnOptions, selFractal, $option, btnResetPlotLocation;
+        var i, btnDraw, btnSave, btnOptions, selFractal, $option, btnResetPlotLocation, btnFullScreen;
 
         // Set up the [Draw] button so that the user can click to draw the image.
         // The user may also draw the image by pressing the [D] key.
@@ -121,8 +139,8 @@ window.Form = (function () {
         btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
         btnResetPlotLocation.onclick = resetPlotLocation;
         $(document).keypress(function (e) {
-            if (e.charCode === 82 /* [R] */)
-                showOptionsDialog();
+            if (e.charCode === 114 /* [R] */)
+                resetPlotLocation();
         });
 
         function resetPlotLocation() {
@@ -134,6 +152,27 @@ window.Form = (function () {
             drawImageFunction();
         }
 
+        // Set up the [Full Screen] button so that the user can toggle full screen mode when it is clicked.
+        // The user may also toggle full screen mode by pressing the [F] key.
+        btnFullScreen = document.getElementById('btnFullScreen');
+        btnFullScreen.onclick = toggleFullScreen;
+        $(document).keypress(function (e) {
+            if (e.charCode === 102 /* [F] */)
+                toggleFullScreen();
+        });
+
+        // Hide the button if full screen mode is not available.        
+        $(document).ready(function () {
+            if (!FullScreen.isFullScreenAvailable())
+                $(btnFullScreen).css('display', 'none');
+        });
+
+        function toggleFullScreen() {
+            if (FullScreen.isFullScreenActive())
+                FullScreen.cancelFullScreen();
+            else
+                FullScreen.makeElementFullScreen(document.body);
+        }
 
         // Estimate the number of cores in the user's CPU and put it in the "Number of Web Workers" input.
         // Once that is done, get the ComputationModule script 
@@ -166,6 +205,7 @@ window.Form = (function () {
 
     return {
         getConfiguration: getConfiguration,
+        setPlotSizeByWindowSize: setPlotSizeByWindowSize,
         setPlotCoordinates: setPlotCoordinates,
         setupForm: setupForm
     };

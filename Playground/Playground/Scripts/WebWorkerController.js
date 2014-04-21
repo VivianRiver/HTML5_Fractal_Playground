@@ -109,6 +109,5 @@
         }
     } // end drawImage                                  
 
-    // Size the plot so that it fits the browser window.
-    document.getElementById('numSize').value = Math.min(window.innerWidth, window.innerHeight);
+    Form.setPlotSizeByWindowSize();    
 })();

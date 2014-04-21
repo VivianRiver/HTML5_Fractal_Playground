@@ -1,5 +1,5 @@
 ﻿/*
-    This defines various iterating functions that can be used to generate 
+    This defines various iterating functions that can be used to generate fractal plots
 */
 
 (function () {
@@ -79,6 +79,9 @@
         outR = +(outR - 1);
         outI = +outI;
     }));
+
+    // Custom
+    // IteratingFunctions.push(new IteratingFunction('Custom...', 0, null));
 
     // Add the iterating functions array to the window to make it globally available.
     window.IteratingFunctions = IteratingFunctions;
