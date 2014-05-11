@@ -178,7 +178,7 @@ window.Form = (function () {
         // Once that is done, get the ComputationModule script 
         Progress.showProgress('Setup', 'Estimating the number of cores in your CPU...')
         Progress.setProgress(-1);
-        navigator.getCores(function (numCores) {
+        navigator.getHardwareConcurrency(function (numCores) {
             Progress.hideProgress();
             document.getElementById('numWorkers').value = numCores.toString();
 
