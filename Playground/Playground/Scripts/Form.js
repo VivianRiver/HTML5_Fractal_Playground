@@ -5,14 +5,14 @@
 
 window.Form = (function () {
     'use strict';
-    var editor, computationModuleCode;
+    var editor, computationModuleCode, drawImageFunction;
 
     // Read the values on the form and return them as a single object.
     function getConfiguration() {
-        var c, avgSize, iteratingFunctionString;
+        var c, avgSize, iteratingFunction;
 
         c = {};
-                
+
         c.automaticPlotSize = document.getElementById('chkAutoPlotSize').checked;
         if (c.automaticPlotSize) {
             // If the user has checked the box to automatically determine the plot size based on the window size, compute it here.
@@ -45,20 +45,38 @@ window.Form = (function () {
         c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
 
         c.numEscape = parseInt(document.getElementById('numEscape').value);
-        
 
-        iteratingFunctionString = (function () {
-            var fractalIndex, retval;
+        iteratingFunction = (function () {
+            var fractalIndex, t, retval;
             fractalIndex = parseInt(document.getElementById('selFractal').value);
-            retval = IteratingFunctions[fractalIndex].iteratingFunction.toString();
-            retval = retval.replace(new RegExp('function \\('), 'function iteratingFunction (');
-            return retval;
+            return IteratingFunctions[fractalIndex];
         })();
 
+        c.fractalId = iteratingFunction.id;
+
         c.code = computationModuleCode
-            .replace(new RegExp('"ITERATINGFUNCTION"'), iteratingFunctionString)
+            .replace(new RegExp('"ITERATINGFUNCTION"'), iteratingFunction.iteratingFunction.toString().replace(new RegExp('function \\('), 'function iteratingFunction ('));
 
         return c;
+    }
+
+    function setConfigurationFromHashUrlConfiguration(c) {
+        // Set the configuration on the form based on the configuration read from the hash URL.
+        // Note that the configuration passed in is expected to have only the following fields:
+        // fractalName, minR, maxR, minI, maxI, numEscape, numMaxIterations, automaticMaxIterations                
+
+        // $('#selFractal option:contains(' + c.fractalName + ')').attr('selected', true)
+        $('#selFractal').val(c.fractalId);
+
+        document.getElementById('numNewMinR').value = c.minR;
+        document.getElementById('numNewMaxR').value = c.maxR;
+        document.getElementById('numNewMinI').value = c.minI;
+        document.getElementById('numNewMaxI').value = c.maxI;
+        document.getElementById('numEscape').value = c.numEscape;
+        document.getElementById('numMaxIterations').value = c.numMaxIterations;
+        document.getElementById('chkAutomaticMaxIterations').checked = c.automaticMaxIterations;
+
+        drawImageFunction();
     }
 
     // Size the plot so that it fits the browser window.
@@ -76,16 +94,24 @@ window.Form = (function () {
     // Set up events to make the form work.
     // Since the form interaction module does not contain the functions to draw,
     // a handler to this function must be passed in.
-    function setupForm(drawImageFunction) {
+    function setupForm(p_drawImageFunction) {
         var i, btnDraw, btnSave, btnOptions, selFractal, $option, btnResetPlotLocation, btnFullScreen;
+
+        drawImageFunction = p_drawImageFunction;
 
         // Set up the [Draw] button so that the user can click to draw the image.
         // The user may also draw the image by pressing the [D] key.
         btnDraw = document.getElementById('btnDraw');
-        btnDraw.onclick = drawImageFunction;
+        btnDraw.onclick = function () {
+            drawImageFunction();
+            HashUrl.SetUrlConfiguration(getConfiguration());
+        };
         $(document).keypress(function (e) {
-            if (e.charCode === 100 /* [D] */)
+            if (e.charCode === 100 /* [D] */) {
                 drawImageFunction();
+                // After drawing the image, set the hash URL so that the user can bookmark it.
+                HashUrl.SetUrlConfiguration(Form.getConfiguration());
+            }
         });
 
         // Set up the [Save] button to allow for the image to be saved to disk.
@@ -129,7 +155,7 @@ window.Form = (function () {
         selFractal = document.getElementById('selFractal');
         for (i = 0; i < IteratingFunctions.length; i++) {
             $option = $('<option>', {
-                value: i.toString()
+                value: IteratingFunctions[i].id
             }).html(IteratingFunctions[i].name);
             $(selFractal).append($option);
         }
@@ -188,8 +214,16 @@ window.Form = (function () {
                 url: 'Scripts/ComputationModule.js',
                 dataType: 'text',
                 success: function (response) {
+                    var hashUrlConfiguration;
                     computationModuleCode = response;
+                    // Try to find a hash URL passed in.
+                    hashUrlConfiguration = HashUrl.GetUrlConfiguration();                    
+                    if (hashUrlConfiguration !== null)
+                        Form.setConfigurationFromHashUrlConfiguration(hashUrlConfiguration);
+                    // Draw the image.
                     drawImageFunction();
+                    // Make sure the has URL is correct after drawing.                    
+                    HashUrl.SetUrlConfiguration(getConfiguration());
                 },
                 error: function (xhr) {
                 }
@@ -205,6 +239,7 @@ window.Form = (function () {
 
     return {
         getConfiguration: getConfiguration,
+        setConfigurationFromHashUrlConfiguration: setConfigurationFromHashUrlConfiguration,
         setPlotSizeByWindowSize: setPlotSizeByWindowSize,
         setPlotCoordinates: setPlotCoordinates,
         setupForm: setupForm

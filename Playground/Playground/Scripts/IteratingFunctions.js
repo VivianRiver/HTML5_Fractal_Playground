@@ -6,7 +6,8 @@
     var IteratingFunctions;
 
     // A constructor for an iterating function
-    function IteratingFunction(name, numberOfParameters, iteratingFunction) {
+    function IteratingFunction(id, name, numberOfParameters, iteratingFunction) {
+        this.id = id;
         this.name = name;
         this.numberOfParameters = numberOfParameters;
         this.iteratingFunction = iteratingFunction;
@@ -15,7 +16,7 @@
     IteratingFunctions = [];
 
     // Mandelbrot
-    IteratingFunctions.push(new IteratingFunction('Mandelbrot', 0, function (r, i, r0, i0) {
+    IteratingFunctions.push(new IteratingFunction(0, 'Mandelbrot', 0, function (r, i, r0, i0) {
         r = +r;
         i = +i;
         r0 = +r0;
@@ -26,7 +27,7 @@
     }));
 
     // Burning Ships
-    IteratingFunctions.push(new IteratingFunction('Burning Ships', 0, function (r, i, r0, i0) {
+    IteratingFunctions.push(new IteratingFunction(1, 'Burning Ships', 0, function (r, i, r0, i0) {
         r = +r;
         i = +i;
         r0 = +r0;
@@ -37,7 +38,7 @@
     }));
 
     // Platypus
-    IteratingFunctions.push(new IteratingFunction('Platypus', 0, function (r, i, r0, i0) {
+    IteratingFunctions.push(new IteratingFunction(2, 'Platypus', 0, function (r, i, r0, i0) {
         r = +r;
         i = +i;
         r0 = +r0;
@@ -48,7 +49,7 @@
     }));
 
     // Split Syringe
-    IteratingFunctions.push(new IteratingFunction('Split Syringe', 0, function (r, i, r0, i0) {
+    IteratingFunctions.push(new IteratingFunction(3, 'Heart Dagger', 0, function (r, i, r0, i0) {
         r = +r;
         i = +i;
         r0 = +r0;
@@ -59,7 +60,7 @@
     }));
 
     // Mandelbar
-    IteratingFunctions.push(new IteratingFunction('Mandelbar', 0, function (r, i, r0, i0) {
+    IteratingFunctions.push(new IteratingFunction(4, 'Mandelbar', 0, function (r, i, r0, i0) {
         r = +r;
         i = +i;
         r0 = +r0;
@@ -70,7 +71,7 @@
     }));
 
     // Newton
-    IteratingFunctions.push(new IteratingFunction('Newton', 0, function (r, i, r0, i0) {
+    IteratingFunctions.push(new IteratingFunction(5, 'Newton', 0, function (r, i, r0, i0) {
         r = +r;
         i = +i;
         r0 = +r0;
@@ -78,6 +79,30 @@
         computePower(r, i, 2);
         outR = +(outR - 1);
         outI = +outI;
+    }));
+
+    // I don't know a name for this.
+    IteratingFunctions.push(new IteratingFunction(6, 'sin(z/c)', 0, function (r, i, r0, i0) {
+        // Divide the previous value by the starting point.
+        // I do this by multiplying by the reciprocal
+        r = +r;
+        i = +i;
+        r0 = +r0;
+        i0 = +i0;
+        divide(r, i, r0, i0);
+        computeSine(outR, outI);
+    }));
+
+    // I don't know a name for this.
+    IteratingFunctions.push(new IteratingFunction(7, 'cos(z/c)', 0, function (r, i, r0, i0) {
+        // Divide the previous value by the starting point.
+        // I do this by multiplying by the reciprocal
+        r = +r;
+        i = +i;
+        r0 = +r0;
+        i0 = +i0;
+        divide(r, i, r0, i0);
+        computeCosine(outR, outI);
     }));
 
     // Custom

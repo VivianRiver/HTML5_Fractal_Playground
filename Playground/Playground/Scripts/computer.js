@@ -28,7 +28,7 @@
                     powerOfTwo *= 2;
                 return powerOfTwo;
             })();
-            heap = new ArrayBuffer(bufferSize);
+            heap = new ArrayBuffer(bufferSize);            
             computationModule = eval(code);
         }
 

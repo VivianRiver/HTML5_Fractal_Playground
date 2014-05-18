@@ -22,8 +22,7 @@
         // Starts at -1 because it gets incremented at the beginning of a loop and should be 0 at the first run.
         nextRowNumber = -1;
         workers = [];
-
-        configuration = Form.getConfiguration();
+        configuration = Form.getConfiguration();        
         plotSize = configuration.plotSize;
         limit = configuration.numEscape;
         max = configuration.numMaxIterations;
@@ -109,5 +108,5 @@
         }
     } // end drawImage                                  
 
-    Form.setPlotSizeByWindowSize();    
+    Form.setPlotSizeByWindowSize();
 })();

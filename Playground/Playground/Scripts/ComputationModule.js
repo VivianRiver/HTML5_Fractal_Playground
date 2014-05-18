@@ -2,6 +2,9 @@
     var computationModule = (function foo1(stdlib, foreign, heap) {
         "use asm";
         var sqrt = stdlib.Math.sqrt,
+            sin = stdlib.Math.sin,
+            cos = stdlib.Math.cos,
+            exp = stdlib.Math.exp,
             heapArray = new stdlib.Int32Array(heap),
             outR = 0.0,
             outI = 0.0;
@@ -61,7 +64,8 @@
         // the string below, will be replaced with code to implement
         // a particular iterating function.
         "ITERATINGFUNCTION"
-        
+
+        // The use of eval would probably give Douglas Crockford heart palpitations :-)
 
         // Compute the result of [r,i] raised to the power n.
         // Place the resulting real part in outR and the imaginary part in outI.
@@ -107,6 +111,46 @@
             outR = rResult;
             outI = iResult;
         } // end computePower
+
+        // Multiply two complex numbers given their real and imaginary parts.
+        //        function multiply(r0, i0, r1, i1) {
+        //            r0 = +r0;
+        //            i0 = +i0;
+        //            r1 = +r1;
+        //            i1 = +i1;
+        //            outR = +(r0 * r1 - i0 * i1);
+        //            outI = +(r0 * i1 - r1 * i0);
+        //        }
+
+        function divide(r0, i0, r1, i1) {
+            // Compute the reciprocal of the second number.
+            //computePower(r1, i1, -1); // outR and ourI now contain the reciprocal of the second number.
+            // Divide the first number by the second by multiplying by the reciprocal we just computed.
+            //multiply(r0, i0, outR, outI);
+            r0 = +r0;
+            i0 = +i0;
+            r1 = +r1;
+            i1 = +i1;
+
+            outR = +(((r0 * r1) + (i0 * i1)) / (r1 * r1 + i1 * i1));
+            outI = +(((i0 * r1 - r0 * i1)) / (r1 * r1 + i1 * i1));
+
+        }
+
+        // Compute the sine of a number given its real and imaginary parts.
+        function computeSine(r, i) {
+            r = +r;
+            i = +i;
+            outR = +(+sin(r) * (+exp(i) + +exp(-i)) / +2);
+            outI = +(+cos(r) * (+exp(i) - +exp(-i)) / +2);
+        }
+
+        function computeCosine(r, i) {
+            r = +r;
+            i = +i;
+            outR = +(+cos(r) * (+exp(i) + +exp(-i)) / +2);
+            outI = +(-(+sin(r)) * (+exp(i) - +exp(-i)) / +2);
+        }
 
         return {
             computeRow: computeRow
