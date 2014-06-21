@@ -2,13 +2,12 @@
 
 <html>
 <head>
-    <title>HTML5 Fractal Playground 1.3.0</title>
+    <title>HTML5 Fractal Playground 2.0.0</title>
     <link rel="Stylesheet" href="Styles/Playground.css" />
     <link rel="Stylesheet" href="Styles/jquery-ui-1.10.4.min.css" />
 
     <script src="Scripts/jquery-1.11.0.min.js" charset="utf-8"></script>
-    <script src="Scripts/jquery-ui-1.10.4.min.js" charset="utf-8"></script>
-    <script src="Scripts/ace/ace.js" charset="utf-8"></script>    
+    <script src="Scripts/jquery-ui-1.10.4.min.js" charset="utf-8"></script>    
     <script src="Scripts/json2.js" charset="utf-8"></script>
 </head>
 <body>
@@ -19,7 +18,7 @@
     -->
     <div>
         <canvas id='plot' style='z-index:0;top:0; left:0; position:absolute;'></canvas>    
-        <canvas id='selection' style='z-index:1; top:0; left:0; position:relative;'></canvas>
+        <canvas id='selection' style='z-index:1; top:0; left:0; position:relative; opacity: 0.5'></canvas>
         <span style='z-index:2; top:0; left:0; position: absolute;'>            
             <!-- [Draw] button -->
             <button id='btnDraw' ><u>D</u>raw</button> 
@@ -39,78 +38,101 @@
     <div id='form' class='dialog'>
         <!--
             These are the forms that allow the user to control the rendering.
+
+            This form is divided up using jQuery-UI tabs for organization.
         -->
-        <div>        
-            General Settings: <br />
-            <input type="number" id='numSize' value='100' />
-            <label for='numSize'>Plot Size</label>
-            <br />
-            <input type='checkbox' id='chkAutoPlotSize' checked="checked" />
-            <label for='chkAutoPlotSize'>Automatically adjust to window size?</label>
-            <br />
-            <input type="number" id='numWorkers' value='1' />
-            <label for='numWorkers'>Number of Web Workers</label>
-            <br />        
+        <div id='OptionsTabs'>                    
+            <ul>
+                <li><a href="#General">General</a></li>
+                <li><a href="#CustomFunction">Custom Function</a></li>
+            </ul>
+            <div id='General'>
+                General Settings: <br />
+                <input type="number" id='numSize' value='100' />
+                <label for='numSize'>Plot Size</label>
+                <br />
+                <input type='checkbox' id='chkAutoPlotSize' checked="checked" />
+                <label for='chkAutoPlotSize'>Automatically adjust to window size?</label>
+                <br />
+                <input type="number" id='numWorkers' value='1' />
+                <label for='numWorkers'>Number of Web Workers</label>
+                <br />        
 
-            <div class='Section'>
-                Plot Location: <br />            
-                <div class='North'>
-                    <label for='numMaxI'>Maximum Imaginary Part</label> <br />
-                    <input type='number' id='numMaxI' value='2' />                
-                </div>                        
-                <div class='West'>
-                    <label for='numMinR'>Minimum Real Part</label> <br />
-                    <input type='number' id='numMinR' value='-2' />
+                <div class='Section'>
+                    Plot Location: <br />            
+                    <div class='North'>
+                        <label for='numMaxI'>Maximum Imaginary Part</label> <br />
+                        <input class='decimalInput' id='numMaxI' value='2' />                
+                    </div>                        
+                    <div class='West'>
+                        <label for='numMinR'>Minimum Real Part</label> <br />
+                        <input class='decimalInput' id='numMinR' value='-2' />
+                    </div>
+                    <div class='East'>
+                        <label for='numMaxR'>Maximum Real Part</label> <br />
+                        <input class='decimalInput' id='numMaxR' value='2' />                
+                    </div>
+                    <div class='South'>
+                        <label for='numMinI'>Minimum Imaginary Part</label> <br />
+                        <input class='decimalInput' id='numMinI' value='-2' /> 
+                    </div>            
                 </div>
-                <div class='East'>
-                    <label for='numMaxR'>Maximum Real Part</label> <br />
-                    <input type='number' id='numMaxR' value='2' />                
-                </div>
-                <div class='South'>
-                    <label for='numMinI'>Minimum Imaginary Part</label> <br />
-                    <input type='number' id='numMinI' value='-2' /> 
-                </div>            
-            </div>
 
-            <div class='Section'>
-                Proposed New Plot Location: <br />
-                (Draw a square on the canvas with the mouse) <br />
-                <div class='North'>
-                    <label for='numMaxI'>Maximum Imaginary Part</label> <br />
-                    <input type='number' id='numNewMaxI' value='2' />                    
-                </div>                        
-                <div class='West'>
-                    <label for='numMinR'>Minimum Real Part</label> <br />
-                    <input type='number' id='numNewMinR' value='-2' />                        
-                </div>
-                <div class='East'>
-                    <label for='numMaxR'>Maximum Real Part</label> <br />
-                    <input type='number' id='numNewMaxR' value='2' />                    
-                </div>
-                <div class='South'>
-                    <label for='numMinI'>Minimum Imaginary Part</label> <br />
-                    <input type='number' id='numNewMinI' value='-2' />                    
-                </div>            
-            </div> <!-- end section -->                       
+                <div class='Section'>
+                    Proposed New Plot Location: <br />
+                    (Draw a square on the canvas with the mouse) <br />
+                    <div class='North'>
+                        <label for='numMaxI'>Maximum Imaginary Part</label> <br />
+                        <input class='decimalInput' id='numNewMaxI' value='2' />                    
+                    </div>                        
+                    <div class='West'>
+                        <label for='numMinR'>Minimum Real Part</label> <br />
+                        <input class='decimalInput' id='numNewMinR' value='-2' />                        
+                    </div>
+                    <div class='East'>
+                        <label for='numMaxR'>Maximum Real Part</label> <br />
+                        <input class='decimalInput' id='numNewMaxR' value='2' />                    
+                    </div>
+                    <div class='South'>
+                        <label for='numMinI'>Minimum Imaginary Part</label> <br />
+                        <input class='decimalInput' id='numNewMinI' value='-2' />                    
+                    </div>            
+                </div> <!-- end section -->                       
+            </div> <!-- end General tab -->
 
-            Advanced!<br />
-            <input type='number' id='numEscape' value='2' />
-            <label for='numEscape'>Number to escape</label>
-            <br />
-            <input type='number' id='numMaxIterations' value='200' />
-            <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
-            <br />
-            <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
-            <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
-            <br />        
-        </div>
-
-        <!--
-            I am not using this for now, but I *will* use it later.        
-        -->
-        <div id='divCode' style='position: relative; width:900px; height: 500px; display:none;'>
-        </div>
-        
+            <div id='CustomFunction'>            
+                Iterating Function: <br />
+                f(z, c) = <input type='text' id='txtFunction' value='z^2 + c' style='width: 500px;' /> <br />
+                <input type='number' id='numEscape' value='2' />
+                <label for='numEscape'>Number to escape</label>
+                <br />
+                <input type='number' id='numMaxIterations' value='200' />
+                <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
+                <br />
+                <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
+                <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
+                <br />        
+                <div class='Section'>
+                    Default Plot Location for This Function: <br />            
+                    <div class='North'>
+                        <label for='numDefaultMaxI'>Maximum Imaginary Part</label> <br />
+                        <input class='decimalInput' id='numDefaultMaxI' value='2' />                
+                    </div>                        
+                    <div class='West'>
+                        <label for='numDefaultMinR'>Minimum Real Part</label> <br />
+                        <input class='decimalInput' id='numDefaultMinR' value='-2' />
+                    </div>
+                    <div class='East'>
+                        <label for='numDefaultMaxR'>Maximum Real Part</label> <br />
+                        <input class='decimalInput' id='numDefaultMaxR' value='2' />                
+                    </div>
+                    <div class='South'>
+                        <label for='numDefaultMinI'>Minimum Imaginary Part</label> <br />
+                        <input class='decimalInput' id='numDefaultMinI' value='-2' /> 
+                    </div>            
+                </div>
+            </div> <!-- end CustomFunction tab -->
+        </div>     
 
     </div> <!-- end form -->
     
@@ -131,17 +153,18 @@
         The next script is from GitHub: https://github.com/oftn/core-estimator
         It provides functionality to guess at how many cores are in the user's computer.
     -->
-    <script src="Scripts/core-estimator/core-estimator.js?version=1.3.0" charset="utf-8"></script>
+    <script src="Scripts/core-estimator/core-estimator.js?version=2.0.0" charset="utf-8"></script>
 
-    <script src="Scripts/Progress.js?version=1.3.0" charset="utf-8"></script>
-    <script src="Scripts/Form.js?version=1.3.0" charset="utf-8"></script>
-    <script src="Scripts/IteratingFunctions.js?version=1.3.0" charset="utf-8"></script>
-    <script src="Scripts/SelectWithMouse.js?version=1.3.0" charset="utf-8"></script>        
-    <script src="Scripts/DrawingFunctions.js?version=1.3.0" charset="utf-8"></script>     
-    <script src="Scripts/WebWorkerController.js?version=1.3.0" charset="utf-8"></script>         
+    <script src="Scripts/Progress.js?version=2.0.0" charset="utf-8"></script>
+    <script src="Scripts/Form.js?version=2.0.0" charset="utf-8"></script>
+    <script src="Scripts/IteratingFunctions.js?version=2.0.0" charset="utf-8"></script>
+    <script src="Scripts/SelectWithMouse.js?version=2.0.0" charset="utf-8"></script>        
+    <script src="Scripts/DrawingFunctions.js?version=2.0.0" charset="utf-8"></script>     
+    <script src="Scripts/WebWorkerController.js?version=2.0.0" charset="utf-8"></script>         
     <script src="Scripts/SelectWithMouse.js" charset="utf-8"></script>            
-    <script src="Scripts/FullScreen.js?version=1.3.0" charset="utf-8"></script>
-    <script src="Scripts/HashUrl.js?version=1.3.0" charset="utf-8"></script>
+    <script src="Scripts/FullScreen.js?version=2.0.0" charset="utf-8"></script>
+    <script src="Scripts/HashUrl.js?version=2.0.0" charset="utf-8"></script>
+    <script src="Scripts/TextFunctionToAsmjs.js?version=2.0.0" charset="utf-8"></script>
     <!--
          TODO: High precision calculations        
     -->

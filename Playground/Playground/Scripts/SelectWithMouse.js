@@ -1,9 +1,9 @@
 ﻿// Allow the user to select a region with the mouse
 
-(function () {    
+(function () {
     'use strict';
     var selectionCanvas, downX, downY, upX, upY, context, isDown, changed;
-    selectionCanvas = document.getElementById('selection');    
+    selectionCanvas = document.getElementById('selection');
     context = selectionCanvas.getContext('2d');
     context.strokeStyle = '#FF0000';
     context.fillStyle = 'rgba(255,0,0,128)';
@@ -36,9 +36,12 @@
         upX = e.layerX;
         upY = e.layerY;
 
-        // Only draw the square when the user is holding down the button.
-        if (e.buttons > 0) {
+        //debugger;
 
+        // Only draw the square when the user is holding down a button.
+        // It appears that some browsers use e.buttons to refer to what button the user has clicked
+        // and some others use e.which.
+        if ((e.buttons && e.buttons > 0) || (e.which && e.which !== 0)) {
             context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
             min = Math.min(upX - downX, upY - downY);
             context.fillStyle = 'rgba(255,0,0,128)';

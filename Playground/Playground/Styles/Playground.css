@@ -40,6 +40,11 @@
     text-align: center;   
 }
 
+.decimalInput
+{
+    width: 256px;
+}
+
 /* A class to use on jQuery-UI dialog boxes where we want no "close" button */
 .no-close .ui-dialog-titlebar-close 
 {

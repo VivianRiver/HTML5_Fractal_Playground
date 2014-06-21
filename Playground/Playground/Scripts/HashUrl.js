@@ -20,8 +20,13 @@
                 maxI: parseFloat(array[4]),
                 numEscape: parseInt(array[5]),
                 numMaxIterations: parseInt(array[6]),
-                automaticMaxIterations: array[7] === 'true'
-            };
+                automaticMaxIterations: array[7] === 'true',                            
+                textFunction: decodeURIComponent(array[8]),
+                defaultMinR: array[9],
+                defaultMaxR: array[10],
+                defaultMinI: array[11],
+                defaultMaxI: array[12]
+            }
 
             // Remember that the configuration returned here does not contain everything that is contained in the configuration
             // returned from the Form!
@@ -34,14 +39,27 @@
     /*
     Set the configuration in the hash URL.        
     */
-    function setUrlConfiguration(configuration) {
+    function setUrlConfiguration(configuration) {        
         var previousUrl, newUrl;
 
         // object level value that indicates what the URL was before we changed it.
         previousUrl = self.location.toString();
 
-        newUrl = previousUrl.split('#')[0] + '#' + [configuration.fractalId, configuration.minR, configuration.maxR, configuration.minI,
-            configuration.maxI, configuration.numEscape, configuration.numMaxIterations, configuration.automaticMaxIterations].join(',');
+        newUrl = previousUrl.split('#')[0] + '#' + [
+                configuration.fractalId,
+                configuration.minR,
+                configuration.maxR,
+                configuration.minI,
+                configuration.maxI,
+                configuration.numEscape,
+                configuration.numMaxIterations,
+                configuration.automaticMaxIterations,
+                encodeURIComponent(configuration.textFunction),
+                configuration.defaultMinR,
+                configuration.defaultMaxR,
+                configuration.defaultMinI,
+                configuration.defaultMaxI
+            ].join(',');
 
         // Set ignoreUrlChange to true so that the program doesn't try to respond to the URL that it just set.
         ignoreUrlChange = true;
