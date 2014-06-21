@@ -39,7 +39,7 @@
 
                 // I get an error sometimes where is says "rgba is undefined".  This little bit of code is meant to catch that so I can figure it out.
                 if (!rgba) {
-                    alert('An error occurred.\nPlease try the operation again.');
+                    alert('An error occurred.\nWe suggest that you click your browser\'s "Back" button to try again.');
                     debugger;
                 }
 

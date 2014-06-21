@@ -36,18 +36,14 @@
         upX = e.layerX;
         upY = e.layerY;
 
-        //debugger;
-
-        // Only draw the square when the user is holding down a button.
-        // It appears that some browsers use e.buttons to refer to what button the user has clicked
-        // and some others use e.which.
-        if ((e.buttons && e.buttons > 0) || (e.which && e.which !== 0)) {
+        // Only draw the square when the user is holding down a button.        
+        if (isDown) {
             context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
             min = Math.min(upX - downX, upY - downY);
             context.fillStyle = 'rgba(255,0,0,128)';
             context.fillRect(downX, downY, min, min);
         }
-    }
+    };
 
     selectionCanvas.onmouseup = function (e) {
         var min, oldMinR, oldMaxR, oldMinI, oldMaxI, newMinR, newMaxR, newMinI, newMaxI;
@@ -79,6 +75,7 @@
         document.getElementById('numNewMaxI').value = newMaxI;
 
         changed = true;
+        isDown = false;
 
         function convertXToR(x, minR, maxR) {
             var diff;

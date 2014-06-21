@@ -61,8 +61,7 @@ window.Form = (function () {
         return c;
     }
 
-    function setConfigurationFromHashUrlConfiguration(c) {
-        debugger;
+    function setConfigurationFromHashUrlConfiguration(c) {       
         // Set the configuration on the form based on the configuration read from the hash URL.
         // Note that the configuration passed in is expected to have only the following fields:
         // fractalName, minR, maxR, minI, maxI, numEscape, numMaxIterations, automaticMaxIterations                
