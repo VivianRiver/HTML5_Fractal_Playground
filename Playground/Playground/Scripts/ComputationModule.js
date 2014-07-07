@@ -1,10 +1,14 @@
-﻿(function () {
+﻿// These functions need unit tests.
+// This line is counted as line 33 in the debugger;
+(function () {
     var computationModule = (function foo1(stdlib, foreign, heap) {
         "use asm";
         var sqrt = stdlib.Math.sqrt,
             sin = stdlib.Math.sin,
             cos = stdlib.Math.cos,
+            atan = stdlib.Math.atan,
             exp = stdlib.Math.exp,
+            ln = stdlib.Math.log,
             heapArray = new stdlib.Int32Array(heap),
             outR = 0.0,
             outI = 0.0;
@@ -113,16 +117,6 @@
             outI = iResult;
         } // end computePower
 
-        // Multiply two complex numbers given their real and imaginary parts.
-        //        function multiply(r0, i0, r1, i1) {
-        //            r0 = +r0;
-        //            i0 = +i0;
-        //            r1 = +r1;
-        //            i1 = +i1;
-        //            outR = +(r0 * r1 - i0 * i1);
-        //            outI = +(r0 * i1 - r1 * i0);
-        //        }
-
         function add(r0, i0, r1, i1) {
             r0 = +r0;
             i0 = +i0;
@@ -154,10 +148,6 @@
         }
 
         function divide(r0, i0, r1, i1) {
-            // Compute the reciprocal of the second number.
-            //computePower(r1, i1, -1); // outR and ourI now contain the reciprocal of the second number.
-            // Divide the first number by the second by multiplying by the reciprocal we just computed.
-            //multiply(r0, i0, outR, outI);
             r0 = +r0;
             i0 = +i0;
             r1 = +r1;
@@ -185,8 +175,30 @@
         function compute_abs(r, i) {
             r = +r;
             i = +i;
-            outR = +sqrt(r * r + i * i);
-            outI = 0.0;
+
+            // If the number is purely real, no need to compute square roots.                        
+            if (i == 0.0) {
+                outR = +(+r > 0.0 ? +r : -r);
+                outI = 0.0;
+            } else {
+                outR = +sqrt(r * r + i * i);
+                outI = 0.0;
+            }
+        }
+
+        // Compute the "Argument" of a complex number, that is the angle of the number in polar coordinates.
+        function compute_arg(r, i) {
+            r = +r;
+            i = +i;
+            if (r == 0.0 & i == 0.0) {
+                // Although arg(0) is undefined, I will use 0 here to avoid errors.
+                outR = 0.0;
+                outI = 0.0;
+            }
+            else {                
+                outR = +(2.0 * +atan(i / (+sqrt(r * r + i * i) + r)));
+                outI = 0.0;
+            }
         }
 
         // Compute the conjugate of a complex number.
@@ -204,40 +216,50 @@
             outR = +(+sin(r) * (+exp(i) + +exp(-i)) / +2);
             outI = +(+cos(r) * (+exp(i) - +exp(-i)) / +2);
 
-//            // This is an experiment to see if using the Taylor series is faster in asm.js
-//            var powerR = 0.0;
-//            var powerI = 0.0;
-//            var factorial = 1.0;
-//            var multiple = 1.0;
-//            var z2_r = 0.0;
-//            var z2_i = 0.0;
-//            var a_r = 0.0;
-//            var a_i = 0.0;
-//            var j = 0.0;
-//            // z ^ 2
-//            multiply(r, i, r, i);
-//            z2_r = +outR;
-//            z2_i = +outI;
+            //            // This is an experiment to see if using the Taylor series is faster in asm.js
+            //            var powerR = 0.0;
+            //            var powerI = 0.0;
+            //            var factorial = 1.0;
+            //            var multiple = 1.0;
+            //            var z2_r = 0.0;
+            //            var z2_i = 0.0;
+            //            var a_r = 0.0;
+            //            var a_i = 0.0;
+            //            var j = 0.0;
+            //            // z ^ 2
+            //            multiply(r, i, r, i);
+            //            z2_r = +outR;
+            //            z2_i = +outI;
 
-//            // accumulator
-//            a_r = +r;
-//            a_i = +i;
-//            for (j = 1.0;
-//                +j < 10.0;
-//                j = +(j + 1.0)) {                
-//                factorial = +(factorial * (j * 2.0) * (j * 2.0 + 1.0));
-//                multiply(powerR, powerI, z2_r, z2_i);
-//                powerR = +outR;
-//                powerI = +outI;
-//                outR = +outR / factorial;
-//                outI = +outI / factorial;
+            //            // accumulator
+            //            a_r = +r;
+            //            a_i = +i;
+            //            for (j = 1.0;
+            //                +j < 10.0;
+            //                j = +(j + 1.0)) {                
+            //                factorial = +(factorial * (j * 2.0) * (j * 2.0 + 1.0));
+            //                multiply(powerR, powerI, z2_r, z2_i);
+            //                powerR = +outR;
+            //                powerI = +outI;
+            //                outR = +outR / factorial;
+            //                outI = +outI / factorial;
 
-//                multiple = +multiple * -1.0;
+            //                multiple = +multiple * -1.0;
 
-//                add(a_r, a_i, outR * multiple, outI * multiple);
-//                a_r = +outR;
-//                a_i = +outI;
-//            }
+            //                add(a_r, a_i, outR * multiple, outI * multiple);
+            //                a_r = +outR;
+            //                a_i = +outI;
+            //            }
+        }
+
+        function compute_sh(r, i) {
+            r = +r;
+            i = +i;
+            // Compute hyperbolic sine using the formula below.
+            // sinh(x) = -i * sin(i * x)
+            multiply(r, i, 0.0, 1.0);
+            compute_sin(outR, outI);
+            multiply(outR, outI, 0.0, -1.0);
         }
 
         function compute_cos(r, i) {
@@ -245,6 +267,14 @@
             i = +i;
             outR = +(+cos(r) * (+exp(i) + +exp(-i)) / +2);
             outI = +(-(+sin(r)) * (+exp(i) - +exp(-i)) / +2);
+        }
+
+        function compute_ch(r, i) {
+            r = +r;
+            i = +i;
+            // cosh(x) = cos(i * x)
+            multiply(r, i, 0.0, 1.0);
+            compute_cos(outR, outI);
         }
 
         // Compute the natural exponental for a number given its real and imaginary parts.
@@ -255,6 +285,21 @@
             t = +exp(+r);
             outR = +(t * +cos(i));
             outI = +(t * +sin(i));
+        }
+
+        // Compute the natural log for a number given its real and imaginary parts.
+        // ln(a+bi) = ln(abs(z)) + i * arg(z)
+        function compute_ln(r, i) {
+            r = +r;
+            i = +i;
+            var realPart = 0.0,
+                imagPart = 0.0;
+            compute_abs(r, i);
+            realPart = +ln(outR);
+            compute_arg(r, i);
+            imagPart = +outR;
+            outR = +realPart;
+            outI = +imagPart;
         }
 
         return {

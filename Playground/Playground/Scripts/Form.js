@@ -36,7 +36,7 @@ window.Form = (function () {
             document.getElementById('numMaxIterations').value = (function () {
                 var value;
                 //  Math.floor(200 / avgSize * 4 );
-                value = Math.floor(200 * Math.log(8 / avgSize) / Math.log(1.5));
+                value = avgSize > 4 ? 400 : Math.floor(200 * Math.log(8 / avgSize) / Math.log(1.5));
                 if (value === Infinity)
                     value = 2147483647;
                 return value;
@@ -61,7 +61,7 @@ window.Form = (function () {
         return c;
     }
 
-    function setConfigurationFromHashUrlConfiguration(c) {       
+    function setConfigurationFromHashUrlConfiguration(c) {
         // Set the configuration on the form based on the configuration read from the hash URL.
         // Note that the configuration passed in is expected to have only the following fields:
         // fractalName, minR, maxR, minI, maxI, numEscape, numMaxIterations, automaticMaxIterations                
@@ -260,34 +260,56 @@ window.Form = (function () {
 
         // Estimate the number of cores in the user's CPU and put it in the "Number of Web Workers" input.
         // Once that is done, get the ComputationModule script 
+        $(document).ready(function () {
+            Progress.showProgress('Setup', 'Estimating the number of cores in your CPU...')
+            Progress.setProgress(-1);
 
-        Progress.showProgress('Setup', 'Estimating the number of cores in your CPU...')
-        Progress.setProgress(-1);
-        navigator.getHardwareConcurrency(function (numCores) {
-            Progress.hideProgress();
-            document.getElementById('numWorkers').value = numCores.toString();
+            if (localStorage['HTML5_numCores']) {
+                // If we have the number of cores in local storage, skip the auto-detection and go straight to the callback.
+                getHardwareConcurrency_Callback(parseInt(localStorage['HTML5_numCores'], 10), false);
+            } else {
+                navigator.getHardwareConcurrency(function (numCores) {
+                    getHardwareConcurrency_Callback(parseInt(numCores, 10), true);
+                });
+            }
 
-            // The estimation is done, so proceed to load the script and invoke the drawImageHandler when that's done.            
-            $.ajax({
-                method: 'GET',
-                url: 'Scripts/ComputationModule.js',
-                dataType: 'text',
-                success: function (response) {
-                    var hashUrlConfiguration;
-                    computationModuleCode = response;
-                    // Try to find a hash URL passed in.
-                    hashUrlConfiguration = HashUrl.GetUrlConfiguration();
-                    if (hashUrlConfiguration !== null)
-                        Form.setConfigurationFromHashUrlConfiguration(hashUrlConfiguration);
-                    // Draw the image.
-                    drawImageFunction();
-                    // Make sure the has URL is correct after drawing.                    
-                    HashUrl.SetUrlConfiguration(getConfiguration());
-                },
-                error: function (xhr) {
+            function getHardwareConcurrency_Callback(numCores, isNew) {
+                var userInput;
+
+                Progress.hideProgress();
+                document.getElementById('numWorkers').value = numCores.toString();
+
+                // The isNew variable indicates whether or not this is a newly detected number of CPU cores.
+                // When the number of CPU cores is newly detected, prompt the user to confirm the number.
+                if (isNew) {
+                    userInput = prompt('This is the number of cores we estimate your CPU is running on.\nIf this looks good, click [OK].  Otherwise, please enter the correct number of cores.\nIf you don\'t know what this means, please just click [OK].', numCores);
+                    numCores = userInput ? parseInt(userInput, 10) : numCores;
                 }
-            });
-        });
+
+                localStorage['HTML5_numCores'] = numCores;
+
+                // The estimation is done, so proceed to load the script and invoke the drawImageHandler when that's done.            
+                $.ajax({
+                    method: 'GET',
+                    url: 'Scripts/ComputationModule.js',
+                    dataType: 'text',
+                    success: function (response) {
+                        var hashUrlConfiguration;
+                        computationModuleCode = response;
+                        // Try to find a hash URL passed in.
+                        hashUrlConfiguration = HashUrl.GetUrlConfiguration();
+                        if (hashUrlConfiguration !== null)
+                            Form.setConfigurationFromHashUrlConfiguration(hashUrlConfiguration);
+                        // Draw the image.
+                        drawImageFunction();
+                        // Make sure the has URL is correct after drawing.                    
+                        HashUrl.SetUrlConfiguration(getConfiguration());
+                    },
+                    error: function (xhr) {
+                    }
+                });
+            }
+        }); // end $(document).ready
     } // end function setupForm
 
     return {

@@ -36,7 +36,7 @@
             var startDt, endDt, result;
             startDt = new Date();
             computationModule.computeRow(e.data.canvasWidth, e.data.canvasHeight, e.data.limit, e.data.max, e.data.rowNumber, e.data.minR, e.data.maxR, e.data.minI, e.data.maxI);
-            endDt = new Date();
+            endDt = new Date();e.data.minR
 
             result = new Int32Array(heap);
 

@@ -19,12 +19,11 @@
         mathArray = parseTextToMathArray(text);
         asmjsCode = convertMathArrayToAsmjs(mathArray);
         return asmjsCode;
-    }    
+    }
 
     function parseTextToMathArray(text) {
         var ONE_ARG_FUNCTIONS;
-        ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'sin', 'cos', 'tan', 'exp', 'ln', 'conj'];
-
+        ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'arg', 'sin', 'cos', 'sh', 'ch', 'exp', 'ln', 'conj'];
 
         // Remove spaces
         text = text.replace(/ /g, '');
@@ -183,7 +182,9 @@
                 else if (mathArray[0] === EXPONENT)
                 // Note that this uses only the real part of the exponent because only whole real numbers are supported, at the moment.
                     result.push('computePower(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ');\n');
-            } else if (mathArray[0] === 'sin' || mathArray[0] === 'cos' || mathArray[0] === 'exp' || mathArray[0] === 'abs' || mathArray[0] === 'real' || mathArray[0] === 'imag' || mathArray[0] === 'conj') {
+
+                // This needs a bit of cleaning up.  I defined a list of these functions elsewhere and the same list should be used here.
+            } else if (mathArray[0] === 'sin' || mathArray[0] === 'cos' || mathArray[0] === 'sh' || mathArray[0] === 'ch' || mathArray[0] === 'exp' || mathArray[0] === 'abs' || mathArray[0] === 'real' || mathArray[0] === 'imag' || mathArray[0] === 'conj') {
                 // Single argument functions
                 firstVariableNum = numVariables;
                 numVariables++;

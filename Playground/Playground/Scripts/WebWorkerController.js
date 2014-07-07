@@ -8,19 +8,25 @@
 // Then, make the StartDrawing function a property on a global object that can be passed as a parameter to Form.setupForm
 // because it shouldn't be called from here.
 
+// Actually, I think it might be better to simply make it so that each time "StartDrawing" is called, it simply kills any threads from a previous draw operation.
+
 
 (function () {
-    var configuration, minR, maxR, minI, maxI, limit, max, rgbaArray, plotSize, rowResults;
+    var configuration, minR, maxR, minI, maxI, limit, max, rgbaArray, plotSize, rowResults, workers;
 
-    Form.setupForm(drawImage);
+    Form.setupForm(startDrawing);
 
     // Draw the image.
-    function drawImage() {
-        var nextRowNumber, workers, farmSize, i;
+    function startDrawing() {
+        var nextRowNumber, workers, farmSize, i, rowsComputed;
         var times = [];
+
+        // Before doing anything, stop any previous drawing operation.
+        cancelDrawing();
 
         // Starts at -1 because it gets incremented at the beginning of a loop and should be 0 at the first run.
         nextRowNumber = -1;
+        rowsComputed = 0;
         workers = [];
         configuration = Form.getConfiguration();
         if (configuration.textFunction === '') {
@@ -47,7 +53,9 @@
 
         rowResults = new Array(height);
 
-        Progress.showProgress('Drawing Image...', null);
+        // Show the progress dialog with a [Cancel] button that will stop the drawing.
+        Progress.showProgress('Drawing Image...', null, true, cancelDrawing);
+
         for (i = 0; i < farmSize; i++) {
             (function () {
                 var worker;
@@ -63,7 +71,10 @@
                     computedRowNumber = e.data.rowNumber;
                     result = e.data.result;
                     rowResults[computedRowNumber] = result;
+                    // nextRowNumber and rowsComputed must be trackes separately because some rows
+                    // take longer to draw than others.
                     nextRowNumber++;
+                    rowsComputed++;
                     if (nextRowNumber < height) {
                         // If there is another row to compute, compute it!
                         computeNextRowAsync(worker);
@@ -78,13 +89,27 @@
                         }
                     }
                     // Update the progress bar with the current progress as a result of the computation being done.
-                    Progress.setProgress(nextRowNumber, height);
+                    Progress.setProgress(rowsComputed, height);
                 }, false);
                 // Setup the worker with the code specified by the user.
                 setupWorker(worker);
                 // Start the worker on the next row.
                 computeNextRowAsync(worker);
+
+                // Put the worker into an array that allows us to easily stop the operation if the user clicks [Cancel].
+                workers.push(worker);
             })();
+        }
+
+        function cancelDrawing() {
+            // In order to cancel the drawing, terminate all of the web-worker processes.
+            if (workers) {
+                for (i = 0; i < workers.length; i++)
+                    workers[i].terminate();
+            }
+
+            // Close any previously opened Progress dialog.
+            Progress.hideProgress();
         }
 
         function setupWorker(thisWorker) {
@@ -110,7 +135,7 @@
                 maxI: maxI
             });
         }
-    } // end drawImage                                  
+    } // end startDrawing                                  
 
     Form.setPlotSizeByWindowSize();
 })();

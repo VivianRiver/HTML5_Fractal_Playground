@@ -15,7 +15,11 @@
     // Attach the progress object to the window to make it globally available.
     window.Progress = progress;
 
-    function showProgress(title, body) {
+    function showProgress(title, body, showCancelButton, cancelButton_callback) {
+        var $btnCancelProgress;
+        $btnCancelProgress = $('#btnCancelProgress');
+
+        // Show the "Progress" dialog.
         $('#divProgressDescription').html(body);
         $('#ProgressDialog').dialog({
             modal: true,
@@ -23,6 +27,18 @@
             closeOnEscape: false,
             dialogClass: 'no-close'
         });
+
+        // Show or hide the [Cancel] button according to user preference.
+        if (showCancelButton) {
+            $btnCancelProgress.show();
+        } else {
+            $btnCancelProgress.hide();
+        }
+
+        // If a callback function for the [Cancel] button is passed in, bind it to the button.
+        $btnCancelProgress.unbind('click');
+        if (cancelButton_callback)
+            $btnCancelProgress.bind('click', cancelButton_callback);
     }
 
     function setProgress(current, max) {
