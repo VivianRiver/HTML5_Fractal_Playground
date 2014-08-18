@@ -1,4 +1,5 @@
 ﻿(function () {
+    'use strict';
     var drawingFunctions, plotCanvas, plotContext, selectionCanvas;
 
     plotCanvas = document.getElementById('plot');
@@ -13,14 +14,16 @@
         plot.height = selection.height = height;
     }
 
-    // Takes an array of arrays with the inner arrays representing columns and the outer arrays representing rows.
-    // Also takes an array of color values produced using toRgbaArray to tell what color corresponds with each value.
-    drawingFunctions.colorPixels = function colorPixels(arrayOfRowResults, maxIterations) {
+    // Takes an array of arrays with the inner arrays representing columns and the outer arrays representing rows.    
+    drawingFunctions.colorPixels = function colorPixels(arrayOfRowResults, maxIterations, colors) {
         var rgbaArray, rgba, value, redIndex, imageData, imageDataIndex, rowNumber, columnNumber;
 
-        rgbaArray = computeRgbaArray(arrayOfRowResults, maxIterations);
+        rgbaArray = computeGradientRgbaArray(arrayOfRowResults, maxIterations, colors);
 
+        // Get a reference to the data that describes the image on the canvas.
+        // We are about to modify this data "by hand"
         imageData = plotContext.getImageData(0, 0, width, height);
+
         for (rowNumber = 0; rowNumber < height; rowNumber++)
             for (columnNumber = 0; columnNumber < width; columnNumber++) {
                 // Each element in imageData is 4 numbers in an array representing the
@@ -28,12 +31,17 @@
                 // Therefore, it is width * height * 4 elements long.
                 // The index of the red value for the pixel at (x,y), therefore, is
                 // (y * width + x) * 4 and the next three are green, blue, and alpha.
+
+                // This array of row results tells the number to escape for each point on the graph.
+                // The rgbaArray tells us what color a point should be for each possible value.
                 value = arrayOfRowResults[rowNumber][columnNumber];
 
+                // If the value is maxIterations, then we assume that the point never escapes for this point and color
+                // it with the interior color, which is the very last element in the rgbaArray.
                 if (value === maxIterations)
-                    rgba = rgbaArray[0];
-                else if (value >= rgbaArray.length)
                     rgba = rgbaArray[rgbaArray.length - 1];
+                else if (value >= rgbaArray.length - 1)
+                    rgba = rgbaArray[rgbaArray.length - 2];
                 else
                     rgba = rgbaArray[value];
 
@@ -56,13 +64,13 @@
         plotContext.putImageData(imageData, 0, 0);
     }
 
-    // compute the array of RGBA values that tell what colors correspond to each number to escape.
-    function computeRgbaArray(arrayOfRowResults, maxIterations) {
+    // compute the array of color values that tell what colors correspond to each number to escape.
+    function computeGradientRgbaArray(arrayOfRowResults, maxIterations, colors) {
         // Before we compute anything else, we need to find what values in the numbers to escape
         // correspond to the extremeties of the colors in the gradient.
         // I want to make sure that the value that corresponds to the maximum and minimum are not just one-off flukes,
         // so I stipulate that the maximum value and minimum value must each cover a certain fraction of pixels on the canvas.
-        var minimumCount, min, max, o, array;
+        var i, minimumCount, min, max, o, array;
         minimumCount = Math.floor(arrayOfRowResults.length * arrayOfRowResults.length * .01);
         o = getMaxAndMinValues(arrayOfRowResults, minimumCount, maxIterations);
         min = o.min;
@@ -70,10 +78,17 @@
 
         // Compute the color that corresponds to any value returned from computeRow.
         array = [];
-        for (i = 0; i < max; i++) {
-            array.push(toRgbaArray(i, min, max));
+        for (i = 0; i <= max; i++) {
+            array.push(toRgbaArray(i, min, max, colors));
         }
-        //        array.push(toRgbaArray(0, min, max));
+
+        // Compute the color to use for points that never escape.
+        array.push([
+            parseInt(colors[2].substr(1, 2), 16),
+            parseInt(colors[2].substr(3, 2), 16),
+            parseInt(colors[2].substr(5, 2), 16),
+            255
+        ]);
 
         return array;
     }
@@ -123,26 +138,43 @@
         return returnObject;
     }
 
-    // Compute the RGBA values corresponding to a given number to escape,
-    // given the minimum and maximum values for the color gradient.
-    function toRgbaArray(x, min, max) {
-        var rgba, intensity;
-        if (x <= min || x >= max)
-            return [0, 0, 0, 255];
+    // Compute the color values associated with a particular number to escape.
+    // Return an array of four elements [red, green, blue, alpha]
+    function toRgbaArray(x, min, max, colors) {
+        var gradient1, gradient2, interior, intensity, hex;
 
-        rgba = [];
+        gradient1 = colors[0];
+        gradient2 = colors[1];
+        interior = colors[2];
+
+        x = Math.max(x, min);
+        x = Math.min(x, max);
+
         intensity = Math.floor(255 * (x - min) / (max - min));
-        if (intensity > 255)
-            intensity = 255;
-        // Red
-        rgba.push(0);
-        // Green
-        rgba.push(intensity);
-        // Blue
-        rgba.push(intensity);
-        // Alpha
-        rgba.push(255);
-        return rgba;
+
+        return [getRed(intensity), getGreen(intensity), getBlue(intensity), 255];
+
+        function getRed(intensity) {
+            var red1Int, red2Int, thisRedInt;
+            red1Int = parseInt(gradient1.substr(1, 2), 16);
+            red2Int = parseInt(gradient2.substr(1, 2), 16);
+            thisRedInt = red1Int + Math.floor((red2Int - red1Int) * intensity / 255);
+            return thisRedInt;
+        }
+        function getGreen(hexString) {
+            var green1Int, green2Int, diff, thisGreenInt;
+            green1Int = parseInt(gradient1.substr(3, 2), 16);
+            green2Int = parseInt(gradient2.substr(3, 2), 16);
+            thisGreenInt = green1Int + Math.floor((green2Int - green1Int) * intensity / 255);
+            return thisGreenInt;
+        }
+        function getBlue(hexString) {
+            var blue1Int, blue2Int, diff, thisBlueInt;
+            blue1Int = parseInt(gradient1.substr(5, 2), 16);
+            blue2Int = parseInt(gradient2.substr(5, 2), 16);
+            thisBlueInt = blue1Int + Math.floor((blue2Int - blue1Int) * intensity / 255);
+            return thisBlueInt;
+        }
     };
 
     // Assign the drawing functions module to a property of the page to make it global.

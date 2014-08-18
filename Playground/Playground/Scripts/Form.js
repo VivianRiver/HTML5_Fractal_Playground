@@ -1,6 +1,6 @@
 ﻿/*
-    Form.js
-    This file contains Javascript to work with the form the user uses to specify what to draw.
+Form.js
+This file contains Javascript to work with the form the user uses to specify what to draw.
 */
 
 window.Form = (function () {
@@ -57,6 +57,13 @@ window.Form = (function () {
         c.code = computationModuleCode
             .replace(new RegExp('"ITERATINGFUNCTION"'),
             "function iteratingFunction(z_r, z_i, c_r, c_i) {\n" + TextFunctionToAsmjs.convert(c.textFunction) + "}\n");
+
+        c.colors = [
+            document.getElementById('color1').value,
+            document.getElementById('color2').value,
+            document.getElementById('color3').value,
+            document.getElementById('color4').value
+        ];
 
         return c;
     }

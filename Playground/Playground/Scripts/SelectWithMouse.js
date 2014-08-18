@@ -1,13 +1,11 @@
 ﻿// Allow the user to select a region with the mouse
+// The user can then zoom in on the selection region by clicking the [Draw] button.
 
 (function () {
     'use strict';
     var selectionCanvas, downX, downY, upX, upY, context, isDown, changed;
     selectionCanvas = document.getElementById('selection');
     context = selectionCanvas.getContext('2d');
-    context.strokeStyle = '#FF0000';
-    context.fillStyle = 'rgba(255,0,0,128)';
-
     isDown = false;
 
     selectionCanvas.onmousedown = function (e) {
@@ -40,7 +38,7 @@
         if (isDown) {
             context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
             min = Math.min(upX - downX, upY - downY);
-            context.fillStyle = 'rgba(255,0,0,128)';
+            setColorFromForm();
             context.fillRect(downX, downY, min, min);
         }
     };
@@ -54,9 +52,20 @@
 
         upX = e.layerX;
         upY = e.layerY;
+
+        // Originally, this code was written under the false assumption that the user would always
+        // select the region top-to-bottom, left-to-right.
+        // I'm adding some extra code here to reverse the coordinates when the user draws the
+        // region the other way.
+        if (upX < downX)
+            upX = [downX, downX = upX][0]; // swap values
+        if (upY < downY)
+            upY = [downY, downY = upY][0]; // swap values
+
+
         context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
         min = Math.min(upX - downX, upY - downY);
-        context.fillStyle = 'rgba(255,0,0,128)';
+        setColorFromForm();
         context.fillRect(downX, downY, min, min);
 
         oldMinR = parseFloat(document.getElementById('numMinR').value);
@@ -87,5 +96,12 @@
             diff = maxI - minI;
             return (diff * y) / selectionCanvas.height + minI;
         }
+    }
+
+    // Set the color so that the selected region is colored with the color
+    // specified by the user on the form.
+    function setColorFromForm() {
+        context.strokeStyle = '#000000';
+        context.fillStyle = Form.getConfiguration().colors[3];
     }
 })();

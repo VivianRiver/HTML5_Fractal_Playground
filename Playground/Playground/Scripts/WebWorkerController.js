@@ -84,7 +84,7 @@
                         // If all workers are done, then it's time to color the pixels to draw the image.
                         farmSize--;
                         if (farmSize === 0) {
-                            drawingFunctions.colorPixels(rowResults, configuration.numMaxIterations);
+                            drawingFunctions.colorPixels(rowResults, configuration.numMaxIterations, configuration.colors);
                             Progress.hideProgress();
                         }
                     }
