@@ -20,7 +20,6 @@
                 // toggle the zoom with the middle button
                 if (changed) {
                     drawImage();
-                    context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
                     changed = false;
                 }
                 break;
@@ -34,18 +33,15 @@
         upX = e.layerX;
         upY = e.layerY;
 
-        // Only draw the square when the user is holding down a button.        
-        if (isDown) {
-            context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
-            min = Math.min(upX - downX, upY - downY);
-            setColorFromForm();
-            context.fillRect(downX, downY, min, min);
+        // Only draw the square when the user is holding down a button
+        // and the X and Y coordinates are different from when the mouse button was originall clicked.
+        // In other words, don't select when the user clicks without moving the mouse or moves the mouse without clicking.
+        if (isDown && downX !== upX && downY !== upY) {            
+            SelectCommon.selectSquare(downX, downY, upX, upY);
         }
     };
 
     selectionCanvas.onmouseup = function (e) {
-        var min, oldMinR, oldMaxR, oldMinI, oldMaxI, newMinR, newMaxR, newMinI, newMaxI;
-
         // Ignore this event except when the left button is clicked.
         if (e.button !== 0)
             return;
@@ -61,47 +57,10 @@
             upX = [downX, downX = upX][0]; // swap values
         if (upY < downY)
             upY = [downY, downY = upY][0]; // swap values
-
-
-        context.clearRect(0, 0, selectionCanvas.width, selectionCanvas.height);
-        min = Math.min(upX - downX, upY - downY);
-        setColorFromForm();
-        context.fillRect(downX, downY, min, min);
-
-        oldMinR = parseFloat(document.getElementById('numMinR').value);
-        oldMaxR = parseFloat(document.getElementById('numMaxR').value);
-        oldMinI = parseFloat(document.getElementById('numMinI').value);
-        oldMaxI = parseFloat(document.getElementById('numMaxI').value);
-
-        newMinR = convertXToR(downX, oldMinR, oldMaxR);
-        newMaxR = convertXToR(downX + min, oldMinR, oldMaxR);
-        newMinI = convertYToI(downY, oldMinI, oldMaxI);
-        newMaxI = convertYToI(downY + min, oldMinI, oldMaxI);
-
-        document.getElementById('numNewMinR').value = newMinR;
-        document.getElementById('numNewMaxR').value = newMaxR;
-        document.getElementById('numNewMinI').value = newMinI;
-        document.getElementById('numNewMaxI').value = newMaxI;
+        
+        SelectCommon.selectSquare(downX, downY, upX, upY);
 
         changed = true;
         isDown = false;
-
-        function convertXToR(x, minR, maxR) {
-            var diff;
-            diff = maxR - minR;
-            return (diff * x) / selectionCanvas.width + minR;
-        }
-        function convertYToI(y, minI, maxI) {
-            var diff;
-            diff = maxI - minI;
-            return (diff * y) / selectionCanvas.height + minI;
-        }
-    }
-
-    // Set the color so that the selected region is colored with the color
-    // specified by the user on the form.
-    function setColorFromForm() {
-        context.strokeStyle = '#000000';
-        context.fillStyle = Form.getConfiguration().colors[3];
     }
 })();
