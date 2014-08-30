@@ -1,5 +1,7 @@
 ﻿// These functions need unit tests.
-// This line is counted as line 33 in the debugger;
+// This line is counted as line 33 in the debugger when the code is processed with eval.
+// This code is read by AJAX and has the appropriate iterating function grafted into it.
+
 (function () {
     var computationModule = (function foo1(stdlib, foreign, heap) {
         "use asm";

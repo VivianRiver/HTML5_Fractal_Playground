@@ -1,7 +1,11 @@
 ﻿// Wrap methods having to do with the fullscreen API so that I can change them in one place if the API changes.
 // Cross-browser code is described at http://www.sitepoint.com/use-html5-full-screen-api/
 
+// jslint directive
+/*jslint browser: true, white: true*/
+
 (function () {
+    'use strict';
     var fullScreen;
 
     function isFullScreenAvailable() {
@@ -51,4 +55,4 @@
 
     // Attach the FullScreen object to the window object to make it globally available.
     window.FullScreen = fullScreen;
-})();
+} ());

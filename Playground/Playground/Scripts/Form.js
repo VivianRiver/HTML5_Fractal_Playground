@@ -3,9 +3,13 @@ Form.js
 This file contains Javascript to work with the form the user uses to specify what to draw.
 */
 
-window.Form = (function () {
+// jslint directive
+/*jslint browser: true, devel: true, white: true*/
+/*global $, IteratingFunctions, Progress, TextFunctionToAsmjs, HashUrl, FullScreen, saveAs, navigator, localStorage */
+
+(function () {
     'use strict';
-    var editor, computationModuleCode, drawImageFunction;
+    var form, computationModuleCode, drawImageFunction;
 
     // Read the values on the form and return them as a single object.
     function getConfiguration() {
@@ -16,11 +20,11 @@ window.Form = (function () {
         c.automaticPlotSize = document.getElementById('chkAutoPlotSize').checked;
         if (c.automaticPlotSize) {
             // If the user has checked the box to automatically determine the plot size based on the window size, compute it here.
-            Form.setPlotSizeByWindowSize();
+            form.setPlotSizeByWindowSize();
         }
-        c.plotSize = parseInt(document.getElementById('numSize').value);
+        c.plotSize = parseInt(document.getElementById('numSize').value, 10);
 
-        c.numWorkers = parseInt(document.getElementById('numWorkers').value);
+        c.numWorkers = parseInt(document.getElementById('numWorkers').value, 10);
 
         c.minR = parseFloat(document.getElementById('numNewMinR').value);
         c.maxR = parseFloat(document.getElementById('numNewMaxR').value);
@@ -37,16 +41,17 @@ window.Form = (function () {
                 var value;
                 //  Math.floor(200 / avgSize * 4 );
                 value = avgSize > 4 ? 400 : Math.floor(200 * Math.log(8 / avgSize) / Math.log(1.5));
-                if (value === Infinity)
+                if (value === Infinity) {
                     value = 2147483647;
+                }
                 return value;
-            })();
+            } ());
         }
-        c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value);
+        c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value, 10);
 
-        c.numEscape = parseInt(document.getElementById('numEscape').value);
+        c.numEscape = parseInt(document.getElementById('numEscape').value, 10);
 
-        c.fractalId = parseInt($('#selFractal').val());
+        c.fractalId = parseInt($('#selFractal').val(), 10);
         c.textFunction = document.getElementById('txtFunction').value;
         c.defaultMinR = $('#numDefaultMinR').val();
         c.defaultMaxR = $('#numDefaultMaxR').val();
@@ -113,103 +118,17 @@ window.Form = (function () {
     // Since the form interaction module does not contain the functions to draw,
     // a handler to this function must be passed in.
     function setupForm(p_drawImageFunction) {
-        var i, btnDraw, btnSave, btnOptions, selFractal, $option, btnResetPlotLocation, btnFullScreen;
+        var i; // iterator
 
-        drawImageFunction = p_drawImageFunction;
-
-        // Set up the [Draw] button so that the user can click to draw the image.
-        // The user may also draw the image by pressing the [D] key.
-        btnDraw = document.getElementById('btnDraw');
-        btnDraw.onclick = function () {
-            drawImageFunction();
-            HashUrl.SetUrlConfiguration(getConfiguration());
-        };
-        $(document).keypress(function (e) {
-            if (e.charCode === 100 /* [D] */ && !optionsDialogIsOpen()) {
-                drawImageFunction();
-                // After drawing the image, set the hash URL so that the user can bookmark it.
-                HashUrl.SetUrlConfiguration(Form.getConfiguration());
-            }
-        });
-
-        // Set up the [Save] button to allow for the image to be saved to disk.
-        // The user may also save the image by pressing the [S] key.
-        btnSave = document.getElementById('btnSave');
-        btnSave.onclick = saveImageFunction;
-        $(document).keypress(function (e) {
-            if (e.charCode === 115 /* [S] */ && !optionsDialogIsOpen())
-                saveImageFunction();
-        });
-
-        function saveImageFunction() {
-            var plot;
-            plot = document.getElementById('plot');
-            plot.toBlob(function (image) {
-                saveAs(image);
-            });
+        function optionsDialogIsOpen() {
+            // Tells whether or not the options dialog is open.                                   
+            return $("#form").dialog("isOpen") === true;
         }
-
-        // Set up the [Options] button so that the user can see the options form when he clicks it.
-        // The user may also open the form by pressing the [O] key.
-        btnOptions = document.getElementById('btnOptions');
-        btnOptions.onclick = showOptionsDialog;
-        $(document).keypress(function (e) {
-            if (e.charCode === 111 /* [O] */ && !optionsDialogIsOpen())
-                showOptionsDialog();
-        });
 
         function showOptionsDialog() {
             // Set up the jQuery-UI dialog with the form elements.
             $('#form').dialog('open');
         }
-
-        // Set up the iterating function selection so that the user can choose a fractal.
-        // The iterating functions are defined in the file IteratingFunctions.js
-        selFractal = document.getElementById('selFractal');
-        for (i = 0; i < IteratingFunctions.length; i++) {
-            $option = $('<option>', {
-                value: IteratingFunctions[i].id
-            }).html(IteratingFunctions[i].name);
-            $(selFractal).append($option);
-        }
-        $('#selFractal').val('0');
-        $(selFractal).change(function () {
-            var id, iteratingFunction, i;
-            // When the user changes the selection of the fractal here, update the text box
-            // that contains the iterating function text.
-            // Then, reset the plot coordinates and draw a new image.
-            // However, if this is a custom function (id = -1),
-            // don't do the above and instead, open the dialog where the user can specify the function.
-            id = parseInt($(this).val());
-
-            if (id === -1) {
-                showOptionsDialog();
-                $('#OptionsTabs').tabs('option', 'active', 1);
-                $('#txtFunction').focus();
-            } else {
-
-                for (i = 0; i < IteratingFunctions.length; i++) {
-                    if (IteratingFunctions[i].id === id) {
-                        $('#txtFunction').val(IteratingFunctions[i].iteratingFunction);
-                        $('#numDefaultMinR').val(IteratingFunctions[i].defaultMinR);
-                        $('#numDefaultMaxR').val(IteratingFunctions[i].defaultMaxR);
-                        $('#numDefaultMinI').val(IteratingFunctions[i].defaultMinI);
-                        $('#numDefaultMaxI').val(IteratingFunctions[i].defaultMaxI);
-                        break;
-                    }
-                }
-                resetPlotLocation();
-            }
-        });
-
-        // Set up the [Reset Plot Location] button so that we return to the original coordinates when it is clicked.
-        // The user may also reset the plot location by pressing the [R] key.
-        btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
-        btnResetPlotLocation.onclick = resetPlotLocation;
-        $(document).keypress(function (e) {
-            if (e.charCode === 114 /* [R] */ && !optionsDialogIsOpen())
-                resetPlotLocation();
-        });
 
         function resetPlotLocation() {
             document.getElementById('numNewMinR').value = document.getElementById('numDefaultMinR').value;
@@ -221,25 +140,147 @@ window.Form = (function () {
             HashUrl.SetUrlConfiguration(getConfiguration());
         }
 
-        // Set up the [Full Screen] button so that the user can toggle full screen mode when it is clicked.
-        // The user may also toggle full screen mode by pressing the [F] key.
-        btnFullScreen = document.getElementById('btnFullScreen');
-        btnFullScreen.onclick = toggleFullScreen;
-        $(document).keypress(function (e) {
-            if (e.charCode === 102 /* [F] */ && !optionsDialogIsOpen())
-                toggleFullScreen();
-        });
+        drawImageFunction = p_drawImageFunction;
 
-        // The one and only thing inside the dialog that we need to immediately respond to is the txtFunction input.
-        // When the user modifies this field manually, the selection box should immediately change to 'Custom' (id = -1)
-        $('#txtFunction').change(function () {
-            $('#selFractal').val('-1');
-        });
+        (function setupDrawButton() {
+            // Set up the [Draw] button so that the user can click to draw the image.
+            // The user may also draw the image by pressing the [D] key.
+            var btnDraw = document.getElementById('btnDraw');
+            btnDraw.onclick = function () {
+                drawImageFunction();
+                HashUrl.SetUrlConfiguration(getConfiguration());
+            };
+            $(document).keypress(function (e) {
+                if (e.charCode === 100 /* [D] */ && !optionsDialogIsOpen()) {
+                    drawImageFunction();
+                    // After drawing the image, set the hash URL so that the user can bookmark it.
+                    HashUrl.SetUrlConfiguration(form.getConfiguration());
+                }
+            });
+        } ());
+
+        (function setupSaveButton() {
+            // Set up the [Save] button to allow for the image to be saved to disk.
+            // The user may also save the image by pressing the [S] key.
+            var btnSave = document.getElementById('btnSave');
+
+            function saveImageFunction() {
+                var plot;
+                plot = document.getElementById('plot');
+                plot.toBlob(function (image) {
+                    var fileName = prompt('Please enter a name for the file to save.', 'image.png');
+                    saveAs(image, fileName);
+                });
+            }
+
+            btnSave.onclick = saveImageFunction;
+            $(document).keypress(function (e) {
+                if (e.charCode === 115 /* [S] */ && !optionsDialogIsOpen()) {
+                    saveImageFunction();
+                }
+            });
+        } ());
+
+        (function setupOptionsButton() {
+            // Set up the [Options] button so that the user can see the options form when he clicks it.
+            // The user may also open the form by pressing the [O] key.
+            var btnOptions = document.getElementById('btnOptions');
+
+            btnOptions.onclick = showOptionsDialog;
+            $(document).keypress(function (e) {
+                if (e.charCode === 111 /* [O] */ && !optionsDialogIsOpen()) {
+                    showOptionsDialog();
+                }
+            });
+        } ());
+
+        (function setupFractalSelection() {
+            // Set up the iterating function selection so that the user can choose a fractal.
+            // The iterating functions are defined in the file IteratingFunctions.js
+            var selFractal = document.getElementById('selFractal'),
+                $option; // a fractal the user can select
+            for (i = 0; i < IteratingFunctions.length; i += 1) {
+                $option = $('<option>', {
+                    value: IteratingFunctions[i].id
+                }).html(IteratingFunctions[i].name);
+                $(selFractal).append($option);
+            }
+            $('#selFractal').val('0');
+            $(selFractal).change(function () {
+                var id;
+                // When the user changes the selection of the fractal here, update the text box
+                // that contains the iterating function text.
+                // Then, reset the plot coordinates and draw a new image.
+                // However, if this is a custom function (id = -1),
+                // don't do the above and instead, open the dialog where the user can specify the function.
+                id = parseInt($(this).val(), 10);
+
+                if (id === -1) {
+                    showOptionsDialog();
+                    $('#OptionsTabs').tabs('option', 'active', 1);
+                    $('#txtFunction').focus();
+                } else {
+
+                    for (i = 0; i < IteratingFunctions.length; i += 1) {
+                        if (IteratingFunctions[i].id === id) {
+                            $('#txtFunction').val(IteratingFunctions[i].iteratingFunction);
+                            $('#numDefaultMinR').val(IteratingFunctions[i].defaultMinR);
+                            $('#numDefaultMaxR').val(IteratingFunctions[i].defaultMaxR);
+                            $('#numDefaultMinI').val(IteratingFunctions[i].defaultMinI);
+                            $('#numDefaultMaxI').val(IteratingFunctions[i].defaultMaxI);
+                            break;
+                        }
+                    }
+                    resetPlotLocation();
+                }
+            });
+        } ());
+
+        (function setupResetPlotLocationButton() {
+            // Set up the [Reset Plot Location] button so that we return to the original coordinates when it is clicked.
+            // The user may also reset the plot location by pressing the [R] key.
+            var btnResetPlotLocation = document.getElementById('btnResetPlotLocation');
+            btnResetPlotLocation.onclick = resetPlotLocation;
+            $(document).keypress(function (e) {
+                if (e.charCode === 114 /* [R] */ && !optionsDialogIsOpen()) {
+                    resetPlotLocation();
+                }
+            });
+        } ());
+
+        (function setupFullScreenButton() {
+            function toggleFullScreen() {
+                if (FullScreen.isFullScreenActive()) {
+                    FullScreen.cancelFullScreen();
+                } else {
+                    FullScreen.makeElementFullScreen(document.body);
+                }
+            }
+
+            // Set up the [Full Screen] button so that the user can toggle full screen mode when it is clicked.
+            // The user may also toggle full screen mode by pressing the [F] key.
+            var btnFullScreen = document.getElementById('btnFullScreen');
+            btnFullScreen.onclick = toggleFullScreen;
+            $(document).keypress(function (e) {
+                if (e.charCode === 102 /* [F] */ && !optionsDialogIsOpen()) {
+                    toggleFullScreen();
+                }
+            });
+        } ());
 
         $(document).ready(function () {
+            var btnFullScreen = document.getElementById('btnFullScreen');
+
+            // The one and only thing inside the dialog that we need to immediately respond to is the txtFunction input.
+            // When the user modifies this field manually, the selection box should immediately change to 'Custom' (id = -1)
+            $('#txtFunction').change(function () {
+                $('#selFractal').val('-1');
+            });
+
             // Hide the button if full screen mode is not available.        
-            if (!FullScreen.isFullScreenAvailable())
+            if (!FullScreen.isFullScreenAvailable()) {
                 $(btnFullScreen).css('display', 'none');
+            }
 
             // Initialize the options dialog, but don't open it yet.
             $('#form').dialog({
@@ -253,33 +294,9 @@ window.Form = (function () {
             $('#OptionsTabs').tabs();
         });
 
-        function toggleFullScreen() {
-            if (FullScreen.isFullScreenActive())
-                FullScreen.cancelFullScreen();
-            else
-                FullScreen.makeElementFullScreen(document.body);
-        }
-
-        function optionsDialogIsOpen() {
-            // Tells whether or not the options dialog is open.                                   
-            return $("#form").dialog("isOpen") === true;
-        }
-
         // Estimate the number of cores in the user's CPU and put it in the "Number of Web Workers" input.
         // Once that is done, get the ComputationModule script 
         $(document).ready(function () {
-            Progress.showProgress('Setup', 'Estimating the number of cores in your CPU...')
-            Progress.setProgress(-1);
-
-            if (localStorage['HTML5_numCores']) {
-                // If we have the number of cores in local storage, skip the auto-detection and go straight to the callback.
-                getHardwareConcurrency_Callback(parseInt(localStorage['HTML5_numCores'], 10), false);
-            } else {
-                navigator.getHardwareConcurrency(function (numCores) {
-                    getHardwareConcurrency_Callback(parseInt(numCores, 10), true);
-                });
-            }
-
             function getHardwareConcurrency_Callback(numCores, isNew) {
                 var userInput;
 
@@ -293,7 +310,7 @@ window.Form = (function () {
                     numCores = userInput ? parseInt(userInput, 10) : numCores;
                 }
 
-                localStorage['HTML5_numCores'] = numCores;
+                localStorage.HTML5_numCores = numCores;
 
                 // The estimation is done, so proceed to load the script and invoke the drawImageHandler when that's done.            
                 $.ajax({
@@ -305,25 +322,39 @@ window.Form = (function () {
                         computationModuleCode = response;
                         // Try to find a hash URL passed in.
                         hashUrlConfiguration = HashUrl.GetUrlConfiguration();
-                        if (hashUrlConfiguration !== null)
-                            Form.setConfigurationFromHashUrlConfiguration(hashUrlConfiguration);
+                        if (hashUrlConfiguration !== null) {
+                            form.setConfigurationFromHashUrlConfiguration(hashUrlConfiguration);
+                        }
                         // Draw the image.
                         drawImageFunction();
                         // Make sure the has URL is correct after drawing.                    
                         HashUrl.SetUrlConfiguration(getConfiguration());
-                    },
-                    error: function (xhr) {
                     }
+                });
+            }
+
+            Progress.showProgress('Setup', 'Estimating the number of cores in your CPU...');
+            Progress.setProgress(-1);
+
+            if (localStorage.HTML5_numCores) {
+                // If we have the number of cores in local storage, skip the auto-detection and go straight to the callback.
+                getHardwareConcurrency_Callback(parseInt(localStorage.HTML5_numCores, 10), false);
+            } else {
+                navigator.getHardwareConcurrency(function (numCores) {
+                    getHardwareConcurrency_Callback(parseInt(numCores, 10), true);
                 });
             }
         }); // end $(document).ready
     } // end function setupForm
 
-    return {
+    form = {
         getConfiguration: getConfiguration,
         setConfigurationFromHashUrlConfiguration: setConfigurationFromHashUrlConfiguration,
         setPlotSizeByWindowSize: setPlotSizeByWindowSize,
         setPlotCoordinates: setPlotCoordinates,
         setupForm: setupForm
     };
-})();
+
+    // Attach the Form object to the window to make it global.    
+    window.Form = form;
+} ());

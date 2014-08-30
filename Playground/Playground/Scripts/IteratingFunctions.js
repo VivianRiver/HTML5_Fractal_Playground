@@ -2,7 +2,12 @@
     This defines various iterating functions that can be used to generate fractal plots
 */
 
+// jslint directive
+/*jslint white: true*/
+/*global window*/
+
 (function () {
+    'use strict';
     var IteratingFunctions;
 
     // A constructor for an iterating function
@@ -79,7 +84,7 @@
 
     IteratingFunctions.push(new IteratingFunction(1101, null, 'sh(z / c)', -1, 1, -1, 1));
     IteratingFunctions.push(new IteratingFunction(1102, null, 'sh(z^2 / c)', -1.5, 1.5, -1.5, 1.5));
-    IteratingFunctions.push(new IteratingFunction(1103, null, 'sh(z^3 / c)', -1.5, 1.5, -1.5, 1.5));        
+    IteratingFunctions.push(new IteratingFunction(1103, null, 'sh(z^3 / c)', -1.5, 1.5, -1.5, 1.5));
 
     IteratingFunctions.push(new IteratingFunction(1301, null, 'sin(z / c^2)', -1.5, 1.5, -1.5, 1.5));
     IteratingFunctions.push(new IteratingFunction(1302, null, 'sin(z / c^3)', -1.5, 1.5, -1.5, 1.5));
@@ -87,7 +92,7 @@
     IteratingFunctions.push(new IteratingFunction(1304, null, 'sin(z / c^5)', -1.5, 1.5, -1.5, 1.5));
     IteratingFunctions.push(new IteratingFunction(1305, null, 'sin(z / c^6)', -1.5, 1.5, -1.5, 1.5));
     IteratingFunctions.push(new IteratingFunction(1305, null, 'sin(z / c^7)', -1.5, 1.5, -1.5, 1.5));
-    IteratingFunctions.push(new IteratingFunction(1306, null, 'sin(z / c^8)', -1.5, 1.5, -1.5, 1.5)); 
+    IteratingFunctions.push(new IteratingFunction(1306, null, 'sin(z / c^8)', -1.5, 1.5, -1.5, 1.5));
 
     IteratingFunctions.push(new IteratingFunction(1202, null, 'sh(z / c^2)', -1, 1, -1, 1));
     IteratingFunctions.push(new IteratingFunction(1203, null, 'sh(z / c^3)', -1, 1, -1, 1));
@@ -133,8 +138,8 @@
     IteratingFunctions.push(new IteratingFunction(1504, null, 'ch(z / c^5)', -1.5, 1.5, -1.5, 1.5));
     IteratingFunctions.push(new IteratingFunction(1505, null, 'ch(z / c^6)', -1.5, 1.5, -1.5, 1.5));
     IteratingFunctions.push(new IteratingFunction(1506, null, 'ch(z / c^7)', -1.5, 1.5, -1.5, 1.5));
-    IteratingFunctions.push(new IteratingFunction(1507, null, 'ch(z / c^8)', -1.5, 1.5, -1.5, 1.5));   
+    IteratingFunctions.push(new IteratingFunction(1507, null, 'ch(z / c^8)', -1.5, 1.5, -1.5, 1.5));
 
     // Add the iterating functions array to the window to make it globally available.
     window.IteratingFunctions = IteratingFunctions;
-})();
+} ());

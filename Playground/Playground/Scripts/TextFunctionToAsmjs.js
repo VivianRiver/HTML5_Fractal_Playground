@@ -3,37 +3,46 @@
     to the appropriate asm.js code.
 */
 
+// jslint directive
+/*jslint browser: true, white: true*/
+
 (function () {
     'use strict';
-    var textFunctionToAsmjs;
-
-    var ADD, SUBTRACT, MULTIPLY, DIVIDE, EXPONENT;
-    ADD = 'ADD';
-    SUBTRACT = 'SUBTRACT';
-    MULTIPLY = 'MULTIPLY';
-    DIVIDE = 'DIVIDE';
-    EXPONENT = 'EXPONENT';
-
-    function convert(text) {
-        var mathArray, asmjsCode;
-        mathArray = parseTextToMathArray(text);
-        asmjsCode = convertMathArrayToAsmjs(mathArray);
-        return asmjsCode;
-    }
-
-    function parseTextToMathArray(text) {
-        var ONE_ARG_FUNCTIONS;
+    var textFunctionToAsmjs,
+        ADD = 'ADD',
+        SUBTRACT = 'SUBTRACT',
+        MULTIPLY = 'MULTIPLY',
+        DIVIDE = 'DIVIDE',
+        EXPONENT = 'EXPONENT',
         ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'arg', 'sin', 'cos', 'sh', 'ch', 'exp', 'ln', 'conj'];
 
-        // Remove spaces
-        text = text.replace(/ /g, '');
-        text = text.replace(/−/g, '-');
-        text = text.toLowerCase();
-
-        return recurse(text);
-
+    // Return an array that parses the output into a sort of ternary tree where the branches of the tree
+    // are either an operator and two operands, or a function with a single argument.
+    // This function operates recursively.
+    function parseTextToMathArray(text) {
         function recurse(text) {
             var index, operator, operand0, operand1, i;
+
+            // Search for the substring within the given text.
+            // Return the index of the first letter of the first instance of the substring.            
+            function findIndex(toFind, text) {
+                var j, c, numParens;
+                numParens = 0;
+                for (j = 0; j < text.length; j += 1) {
+                    c = text.substr(j, toFind.length);
+                    // The first part of the expression checks for a match.
+                    // The second part of the expression checks that we're not looking for subtraction and finding a unary '-' instead.
+                    if (c === toFind && numParens === 0 && !(toFind === '-' && (j === 0 || text[j - 1] === '(' || text[j - 1] === '+' || text[j - 1] === '*' || text[j - 1] === '/' || text[j - 1] === '^'))) {
+                        return j;
+                    }
+                    if (c.substr(0, 1) === '(') {
+                        numParens += 1;
+                    } else if (c.substr(0, 1) === ')') {
+                        numParens -= 1;
+                    }
+                }
+                return -1;
+            } // end function findIndex
 
             index = findIndex('-', text);
             if (index > -1) {
@@ -69,21 +78,20 @@
 
             index = findIndex('^', text);
             if (index > -1) {
-                operator = EXPONENT
+                operator = EXPONENT;
                 operand0 = text.substr(0, index);
                 operand1 = text.substr(index + 1);
                 return [operator, recurse(operand0), recurse(operand1)];
             }
 
             // If we didn't find any of the operators, look for the one argument functions
-            for (i = 0; i < ONE_ARG_FUNCTIONS.length; i++) {
+            for (i = 0; i < ONE_ARG_FUNCTIONS.length; i += 1) {
                 index = findIndex(ONE_ARG_FUNCTIONS[i], text);
                 if (index > -1) {
                     operand0 = text.substr(index + ONE_ARG_FUNCTIONS[i].length, text.length - ONE_ARG_FUNCTIONS[i].length - index * 2);
                     return [ONE_ARG_FUNCTIONS[i], recurse(operand0)];
                 }
             }
-
 
             // If we've made it this far, there isn't a single operation we can perform without going inside parenthesis.
             // This means that this is either a primitive expression (in which case there will be no parenthesis),
@@ -95,47 +103,20 @@
             }
 
             return text;
-        } // end function recurse
+        } // end function recurse        
 
-        // Search for the substring within the given text.
-        // Return the index of the first letter of the first instance of the substring.            
-        function findIndex(toFind, text) {
-            var i, c, numParens;
-            numParens = 0;
-            for (i = 0; i < text.length; i++) {
-                c = text.substr(i, toFind.length);
-                // The first part of the expression checks for a match.
-                // The second part of the expression checks that we're not looking for subtraction and finding a unary '-' instead.
-                if (c === toFind && numParens === 0 && !(toFind === '-' && (i === 0 || text[i - 1] === '(' || text[i - 1] === '+' || text[i - 1] === '*' || text[i - 1] === '/' || text[i - 1] === '^')))
-                    return i;
-                else if (c.substr(0, 1) === '(')
-                    numParens++;
-                else if (c.substr(0, 1) === ')')
-                    numParens--;
-            }
-            return -1;
-        } // end function findIndex
-    }
+        // Remove spaces
+        text = text.replace(/ /g, '');
+        text = text.replace(/−/g, '-');
+        text = text.toLowerCase();
 
+        return recurse(text);
+    } // end function parseTextToMathArray
+
+    // Parse a tree-like structure representing a mathematical expression and generate corresponding asm.js code.    
+    // This function operates recursively.
     function convertMathArrayToAsmjs(mathArray) {
         var i, numVariables, argumentTypeDeclarations, variableDeclarations, computationCode, asmjsCode;
-        numVariables = 0;
-
-        // numVariables will be incremented to the actual number of variables to declare when recurse is called.
-        computationCode = recurse(mathArray);
-
-        argumentTypeDeclarations = 'z_r = +z_r;\nz_i = +z_i;\nc_r = +c_r;\nc_i = +c_i;\n';
-
-        // Declare all the the variables as doubles.
-        variableDeclarations = [];
-        for (i = 0; i < numVariables; i++) {
-            variableDeclarations.push('var __r' + i + ' = 0.0;\n');
-            variableDeclarations.push('var __i' + i + ' = 0.0;\n');
-        }
-        variableDeclarations = variableDeclarations.join('');
-
-        asmjsCode = argumentTypeDeclarations + variableDeclarations + computationCode;
-        return asmjsCode;
 
         function recurse(mathArray) {
             var firstVariableNum, secondVariableNum, result;
@@ -159,35 +140,36 @@
             } else if (mathArray[0] === ADD || mathArray[0] === SUBTRACT || mathArray[0] === MULTIPLY || mathArray[0] === DIVIDE || mathArray[0] === EXPONENT) {
                 // var var_n;
                 firstVariableNum = numVariables;
-                numVariables++;
+                numVariables += 1;
                 // Result will be in outR and outI
                 result.push(recurse(mathArray[1]));
                 result.push('__r' + firstVariableNum + ' = +outR;\n');
                 result.push('__i' + firstVariableNum + ' = +outI;\n');
 
                 secondVariableNum = numVariables;
-                numVariables++;
+                numVariables += 1;
                 result.push(recurse(mathArray[2]));
                 result.push('__r' + secondVariableNum + ' = +outR;\n');
                 result.push('__i' + secondVariableNum + ' = +outI;\n');
 
-                if (mathArray[0] === ADD)
+                if (mathArray[0] === ADD) {
                     result.push('add(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                else if (mathArray[0] === SUBTRACT)
+                } else if (mathArray[0] === SUBTRACT) {
                     result.push('subtract(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                else if (mathArray[0] === MULTIPLY)
+                } else if (mathArray[0] === MULTIPLY) {
                     result.push('multiply(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                else if (mathArray[0] === DIVIDE)
+                } else if (mathArray[0] === DIVIDE) {
                     result.push('divide(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                else if (mathArray[0] === EXPONENT)
-                // Note that this uses only the real part of the exponent because only whole real numbers are supported, at the moment.
+                } else if (mathArray[0] === EXPONENT) {
+                    // Note that this uses only the real part of the exponent because only whole real numbers are supported, at the moment.
                     result.push('computePower(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ');\n');
+                }
 
                 // This needs a bit of cleaning up.  I defined a list of these functions elsewhere and the same list should be used here.
             } else if (mathArray[0] === 'sin' || mathArray[0] === 'cos' || mathArray[0] === 'sh' || mathArray[0] === 'ch' || mathArray[0] === 'exp' || mathArray[0] === 'abs' || mathArray[0] === 'real' || mathArray[0] === 'imag' || mathArray[0] === 'conj') {
                 // Single argument functions
                 firstVariableNum = numVariables;
-                numVariables++;
+                numVariables += 1;
                 result.push(recurse(mathArray[1]));
                 result.push('__r' + firstVariableNum + ' = outR;\n');
                 result.push('__i' + firstVariableNum + ' = outI;\n');
@@ -196,11 +178,39 @@
                 result.push('compute_' + mathArray[0] + '(__r' + firstVariableNum + ', __i' + firstVariableNum + ');\n');
             }
 
-
-
             return result.join('');
         }
+
+        numVariables = 0;
+
+        // numVariables will be incremented to the actual number of variables to declare when recurse is called.
+        computationCode = recurse(mathArray);
+
+        argumentTypeDeclarations = 'z_r = +z_r;\nz_i = +z_i;\nc_r = +c_r;\nc_i = +c_i;\n';
+
+        // Declare all the the variables as doubles.
+        variableDeclarations = [];
+        for (i = 0; i < numVariables; i += 1) {
+            variableDeclarations.push('var __r' + i + ' = 0.0;\n');
+            variableDeclarations.push('var __i' + i + ' = 0.0;\n');
+        }
+        variableDeclarations = variableDeclarations.join('');
+
+        asmjsCode = argumentTypeDeclarations + variableDeclarations + computationCode;
+        return asmjsCode;
+
+
     }
+
+    // Convert a textual mathematics expression to asm.js code.
+    // This is the only function that is exposed to the calling code.
+    function convert(text) {
+        var mathArray, asmjsCode;
+        mathArray = parseTextToMathArray(text);
+        asmjsCode = convertMathArrayToAsmjs(mathArray);
+        return asmjsCode;
+    }
+
 
     textFunctionToAsmjs = {
         convert: convert
@@ -208,4 +218,4 @@
 
     // Add the textFunctionToAsmjs object to the window to make it global.
     window.TextFunctionToAsmjs = textFunctionToAsmjs;
-})();
+} ());

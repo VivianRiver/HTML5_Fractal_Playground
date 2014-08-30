@@ -2,7 +2,8 @@
 // regardless of the method used to select the region. (touch or mouse)
 
 // directive for JSLint
-/*global document, window, Form*/
+/*jslint browser: true, white: true */
+/*global Form*/
 
 (function () {
     'use strict';

@@ -4,6 +4,7 @@
 // There is a shortcut where touching with a third finger is equivalent to clicking [Draw]
 
 // directive for JSLint
+/*jslint white: true*/
 /*global SelectCommon, document*/
 
 (function () {
