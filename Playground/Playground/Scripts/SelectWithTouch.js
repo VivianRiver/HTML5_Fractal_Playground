@@ -44,7 +44,7 @@
         SelectCommon.selectSquare(x0, y0, x1, y1);
     }
 
-    function documentTouched(e) {        
+    function documentTouched(e) {
         var canvasTouches; // Touches on the canvas        
 
         // Cancel default functionality when canvas is touched.
@@ -56,12 +56,12 @@
 
         if (canvasTouches.length === 2) {
             // If two touches, then select a region between them.
-            selectWithTwoTouches(canvasTouches[0], canvasTouches[1]);           
+            selectWithTwoTouches(canvasTouches[0], canvasTouches[1]);
         } else if (canvasTouches.length === 3) {
             // If three touches, zoom in on the newly selected region and redraw.
             // This is a shortcut for clicking the [Draw] button.
             document.getElementById('btnDraw')
-                .click();            
+                .click();
         }
     }
 
@@ -79,10 +79,15 @@
     function touchCancel(e) {
     }
 
-    document.ontouchstart = touchStart;
-    document.ontouchmove = touchMove;
-    document.ontouchend = touchEnd;
-    document.ontouchcancel = touchCancel;
+    document.addEventListener('touchstart', touchStart);
+    document.addEventListener('touchmove', touchMove);
+    document.addEventListener('touchend', touchEnd);
+    document.addEventListener('touchcancel', touchCancel);
+
+    //    document.ontouchstart = touchStart;
+    //    document.ontouchmove = touchMove;
+    //    document.ontouchend = touchEnd;
+    //    document.ontouchcancel = touchCancel;
 
     document.oncontextmenu = function (e) {
         /*
