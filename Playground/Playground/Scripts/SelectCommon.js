@@ -42,7 +42,8 @@
         function convertYToI(y, minI, maxI) {
             var diff;
             diff = maxI - minI;
-            return (diff * y) / selectionCanvas.height + minI;
+            // This computation takes into account the the imaginary value goes *down* as the y-coordinate on the canvas increases.
+            return maxI - ((diff * y) / selectionCanvas.height);
         }
 
         // Clear the canvas and shade the newly selected region.        
@@ -61,8 +62,9 @@
 
         newMinR = convertXToR(x0, oldMinR, oldMaxR);
         newMaxR = convertXToR(x0 + edgeLength, oldMinR, oldMaxR);
-        newMinI = convertYToI(y0, oldMinI, oldMaxI);
-        newMaxI = convertYToI(y0 + edgeLength, oldMinI, oldMaxI);
+        // This must take into account the fact the the imaginary value goes *down* as the y-coordinate on the canvas increases.
+        newMinI = convertYToI(y0 + edgeLength, oldMinI, oldMaxI);
+        newMaxI = convertYToI(y0, oldMinI, oldMaxI);
 
         document.getElementById('numNewMinR').value = newMinR;
         document.getElementById('numNewMaxR').value = newMaxR;

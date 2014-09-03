@@ -29,8 +29,9 @@
             var columnNumber = 0.0, zReal = 0.0, zImaginary = 0.0, numberToEscape = 0;
             var columnNumberInt = 0;
 
-            // Compute the imaginary part of the numbers that correspond to pixels in this row.
-            zImaginary = +(((maxI - minI) * +rowNumber) / +canvasHeight + minI);
+            // Compute the imaginary part of the numbers that correspond to pixels in this row.            
+            // This computation takes into account the the imaginary value goes *down* as the y-coordinate on the canvas increases.
+            zImaginary = maxI - (((maxI - minI) * +rowNumber) / +canvasHeight);
             // Iterate over the pixels in this row.
             // Compute the number of iterations to escape for each pixel that will determine its color.
             for (columnNumber = +0; +columnNumber < +canvasWidth; columnNumber = +(+columnNumber + 1.0)) {
@@ -197,7 +198,7 @@
                 outR = 0.0;
                 outI = 0.0;
             }
-            else {                
+            else {
                 outR = +(2.0 * +atan(i / (+sqrt(r * r + i * i) + r)));
                 outI = 0.0;
             }

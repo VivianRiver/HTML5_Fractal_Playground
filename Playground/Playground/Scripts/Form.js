@@ -315,7 +315,7 @@ This file contains Javascript to work with the form the user uses to specify wha
                 // The estimation is done, so proceed to load the script and invoke the drawImageHandler when that's done.            
                 $.ajax({
                     method: 'GET',
-                    url: 'Scripts/ComputationModule.js',
+                    url: 'Scripts/ComputationModule.js?version=2.4.0',
                     dataType: 'text',
                     success: function (response) {
                         var hashUrlConfiguration;
