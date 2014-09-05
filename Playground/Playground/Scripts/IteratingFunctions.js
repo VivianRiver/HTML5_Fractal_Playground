@@ -140,6 +140,8 @@
     IteratingFunctions.push(new IteratingFunction(1506, null, 'ch(z / c^7)', -1.5, 1.5, -1.5, 1.5));
     IteratingFunctions.push(new IteratingFunction(1507, null, 'ch(z / c^8)', -1.5, 1.5, -1.5, 1.5));
 
+    IteratingFunctions.push(new IteratingFunction(1601, null, 'z ^ 2 + c * arg(c)', -1, 1, -1, 1));
+
     // Add the iterating functions array to the window to make it globally available.
     window.IteratingFunctions = IteratingFunctions;
 } ());

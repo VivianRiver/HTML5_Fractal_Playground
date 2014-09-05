@@ -2,15 +2,18 @@
 // This line is counted as line 33 in the debugger when the code is processed with eval.
 // This code is read by AJAX and has the appropriate iterating function grafted into it.
 
-(function () {
+function getComputationModule() {
     var computationModule = (function foo1(stdlib, foreign, heap) {
         "use asm";
         var sqrt = stdlib.Math.sqrt,
             sin = stdlib.Math.sin,
             cos = stdlib.Math.cos,
             atan = stdlib.Math.atan,
+            atan2 = stdlib.Math.atan2,
             exp = stdlib.Math.exp,
             ln = stdlib.Math.log,
+            floor = stdlib.Math.floor,
+            ceil = stdlib.Math.ceil,
             heapArray = new stdlib.Int32Array(heap),
             outR = 0.0,
             outI = 0.0;
@@ -74,14 +77,26 @@
 
         // The use of eval would probably give Douglas Crockford heart palpitations :-)
 
+        // Truncates the decimal part of a real number.
+        function truncateDecimal(r) {
+            r = +r;
+
+            if (+r > 0.0)
+                return +floor(r);
+            else
+                return +ceil(r);
+            return 0.0;
+        }
+
         // Compute the result of [r,i] raised to the power n.
         // Right now, this only supports whole numbers, but the calling code uses only doubles, so that's what it's declared as.
         // Place the resulting real part in outR and the imaginary part in outI.
-        function computePower(r, i, n) {
+        function computePower(r, i, expr, expi) {
             // Tell asm.js that r, i are floating point and n is an integer.
             r = +r;
             i = +i;
-            n = +n;
+            expr = +expr;
+            expi = +expi;
 
             // Declare and initialize variables to be numbers.
             var rResult = 0.0;
@@ -92,32 +107,51 @@
 
             // Declare and initialize variables that will be used only in the
             // event we need to compute the reciprocal.
-            var abs = 0.0;
+            var abs_squared = 0.0;
             var recr = 0.0;
             var reci = 0.0;
 
-            if (+n < 0.0) {
-                // For n less than 0, compute the reciprocal and then raise it to the opposite power.
-                abs = +sqrt(r * r + i * i);
-                recr = r / abs;
-                reci = -i / abs;
-                r = recr;
-                i = reci;
-                n = +(-n);
+            if (+truncateDecimal(expr) == +expr) if (expi == 0.0) {
+
+                if (+expr < 0.0) {
+                    // For n less than 0, compute the reciprocal and then raise it to the opposite power.
+                    abs_squared = +(r * r + i * i);
+                    recr = +r / abs_squared;
+                    reci = -i / abs_squared;
+                    r = recr;
+                    i = reci;
+                    expr = +(-expr);
+                }
+
+                rResult = r;
+                iResult = i;
+
+                for (j = 1.0; +j < +expr; j = +(j + 1.0)) {
+                    tr = rResult * r - iResult * i;
+                    ti = rResult * i + iResult * r;
+                    rResult = tr;
+                    iResult = ti;
+                }
+
+                outR = rResult;
+                outI = iResult;
+                return;
             }
+             
+            // If the exponent is not a whole number or has non-zero imaginary part, use logarithms
+            // together with the exponential function to compute the power.
+            // x ^ y = e ^ (ln(x) * y)
 
-            rResult = r;
-            iResult = i;
+            // Compute the natural log of the base:
+            compute_ln(r, i);
 
-            for (j = 1.0; +j < +n; j = +(j + 1.0)) {
-                tr = rResult * r - iResult * i;
-                ti = rResult * i + iResult * r;
-                rResult = tr;
-                iResult = ti;
-            }
+            // Multiply that by the exponent:
+            multiply(outR, outI, expr, expi);
 
-            outR = rResult;
-            outI = iResult;
+            // Exponentiate the result
+            compute_exp(outR, outI);
+
+            // The result is now in outR, outI.            
         } // end computePower
 
         function add(r0, i0, r1, i1) {
@@ -199,7 +233,8 @@
                 outI = 0.0;
             }
             else {
-                outR = +(2.0 * +atan(i / (+sqrt(r * r + i * i) + r)));
+                // outR = +(2.0 * +atan(i / (+sqrt(r * r + i * i) + r)));
+                outR = +(atan2(i, r));
                 outI = 0.0;
             }
         }
@@ -305,11 +340,50 @@
             outI = +imagPart;
         }
 
+        function get_outR() {
+            return +outR;
+        }
+        function set_outR(r) {
+            r = +r;
+            outR = +r;
+        }
+
+        function get_outI() {
+            return +outI;
+        }
+        function set_outI(i) {
+            i = +i;
+            outI = +i;
+        }
+
         return {
-            computeRow: computeRow
+            // The primary point-of-entry for the computation module
+            computeRow: computeRow,
+
+            // These functions are exposed to make them testable, but they won't normally be directly invoked.
+            computePower: computePower,
+            add: add,
+            subtract: subtract,
+            multiply: multiply,
+            divide: divide,
+            compute_real: compute_real,
+            compute_imag: compute_imag,
+            compute_abs: compute_abs,
+            compute_arg: compute_arg,
+            compute_conj: compute_conj,
+            compute_sin: compute_sin,
+            compute_cos: compute_cos,
+            compute_sh: compute_sh,
+            compute_ch: compute_ch,
+            compute_exp: compute_exp,
+            compute_ln: compute_ln,
+            get_outR: get_outR,
+            set_outR: set_outR,
+            get_outI: get_outI,
+            set_outI: set_outI
         };
     })(self, foreign, heap);
 
     // Return computationModule that we just defined.
     return computationModule;
-})();
+}

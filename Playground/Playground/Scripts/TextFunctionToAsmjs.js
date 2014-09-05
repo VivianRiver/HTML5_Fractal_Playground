@@ -160,9 +160,8 @@
                     result.push('multiply(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
                 } else if (mathArray[0] === DIVIDE) {
                     result.push('divide(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                } else if (mathArray[0] === EXPONENT) {
-                    // Note that this uses only the real part of the exponent because only whole real numbers are supported, at the moment.
-                    result.push('computePower(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ');\n');
+                } else if (mathArray[0] === EXPONENT) {                    
+                    result.push('computePower(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
                 }
 
                 // This needs a bit of cleaning up.  I defined a list of these functions elsewhere and the same list should be used here.
