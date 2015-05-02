@@ -88,11 +88,10 @@ function getComputationModule() {
             return 0.0;
         }
 
-        // Compute the result of [r,i] raised to the power n.
-        // Right now, this only supports whole numbers, but the calling code uses only doubles, so that's what it's declared as.
-        // Place the resulting real part in outR and the imaginary part in outI.
+        // Compute the result of [r,i] raised to the power with the given real and imaginary parts..        
+        // Places the resulting real part in outR and the imaginary part in outI.
         function computePower(r, i, expr, expi) {
-            // Tell asm.js that r, i are floating point and n is an integer.
+            // Tell asm.js that r, i, expr, and expi are floating-point numbers.
             r = +r;
             i = +i;
             expr = +expr;
@@ -112,7 +111,7 @@ function getComputationModule() {
             var reci = 0.0;
 
             if (+truncateDecimal(expr) == +expr) if (expi == 0.0) {
-
+                // Compute the result if the exponent is an integer real number.
                 if (+expr < 0.0) {
                     // For n less than 0, compute the reciprocal and then raise it to the opposite power.
                     abs_squared = +(r * r + i * i);

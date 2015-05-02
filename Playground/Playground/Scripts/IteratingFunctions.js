@@ -36,6 +36,9 @@
     IteratingFunctions.push(new IteratingFunction(105, 'Mandelbrot-7', 'z ^ 7 + c', -2, 2, -2, 2));
     IteratingFunctions.push(new IteratingFunction(106, 'Mandelbrot-8', 'z ^ 8 + c', -2, 2, -2, 2));
 
+    // Twin Laser
+    IteratingFunctions.push(new IteratingFunction(1701, 'Twin Laser', 'z^2.015 + c', -2, 2, -2, 2));
+
     // Burning Ships
     IteratingFunctions.push(new IteratingFunction(1, 'Burning Ships', '(abs(real(z)) + abs(imag(z)) * i) ^ 2 + c', -2, 2, -2, 2));
     IteratingFunctions.push(new IteratingFunction(201, 'Burning Ships-3', '(abs(real(z)) + abs(imag(z)) * i) ^ 3 + c', -2, 2, -2, 2));

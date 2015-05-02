@@ -13,10 +13,11 @@
     function setup(data) {
         var code, bufferSize;
         code = data.code;
-        // Buffer size has to be a power of 2 at least 4096 to make asm.js happy.
-        // We want to use the smallest power of 2 that is smaller than 4 times the canvas width and at least 4096
+        // Buffer size has to be a power of 2 at least 65536 to make asm.js happy.
+        // We want to use the smallest power of 2 that is smaller than 4 times the canvas width and at least 65536
+        // That's because the value computed of each pixel in the row is represented as a 4-byte integer
         bufferSize = (function () {
-            var powerOfTwo = 4096;
+            var powerOfTwo = 65536;
             while (data.canvasWidth * 4 >= powerOfTwo) {
                 powerOfTwo *= 2;
             }
