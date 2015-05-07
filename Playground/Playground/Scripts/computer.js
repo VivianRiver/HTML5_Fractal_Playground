@@ -16,13 +16,15 @@
         // Buffer size has to be a power of 2 at least 65536 to make asm.js happy.
         // We want to use the smallest power of 2 that is smaller than 4 times the canvas width and at least 65536
         // That's because the value computed of each pixel in the row is represented as a 4-byte integer
-        bufferSize = (function () {
-            var powerOfTwo = 65536;
-            while (data.canvasWidth * 4 >= powerOfTwo) {
-                powerOfTwo *= 2;
-            }
-            return powerOfTwo;
-        } ());
+        //bufferSize = (function () {
+        //    var powerOfTwo = 65536;
+        //    while (data.canvasWidth * 4 >= powerOfTwo) {
+        //        powerOfTwo *= 2;
+        //    }
+        //    return powerOfTwo;
+        //} ());
+        // TODO: FIX THIS DEBUGGING CODE
+        bufferSize = 65536 * 2;
         heap = new ArrayBuffer(bufferSize);
 
         foreign = {}; // This is not unused; it gets read by the eval code below.
@@ -40,10 +42,12 @@
             result; // the result of the computation
 
         startDt = new Date();
-        computationModule.computeRow(data.canvasWidth, data.canvasHeight, data.limit, data.max, data.rowNumber, data.minR, data.maxR, data.minI, data.maxI);
+        computationModule.computeRow(data.canvasWidth, data.canvasHeight, data.graphingMethod, data.limit, data.max, data.tolerance, data.maxPeriod, data.rowNumber, data.minR, data.maxR, data.minI, data.maxI);
         endDt = new Date();
 
-        result = new Int32Array(heap);
+        // The heap contains the result of the computation, but it also contains some working memory.
+        // We want to only take as many elements from the heap as there are pixels in the canvas width.
+        result = new Int32Array(heap, 0, data.canvasWidth);
 
         self.postMessage({
             rowNumber: data.rowNumber,

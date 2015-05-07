@@ -26,7 +26,7 @@
 
                 if (value < absoluteMinimum) {
                     absoluteMinimum = value;
-                } else if (value > absoluteMaximum && value !== maxIterations) { /* exclude points assumed to be inside the set */
+                } else if (value > absoluteMaximum && value !== maxIterations) { /* exclude points that iterated to the maximum */
                     absoluteMaximum = value;
                 }
 

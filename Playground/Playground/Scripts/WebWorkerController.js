@@ -10,7 +10,7 @@
 
 (function () {
     'use strict';
-    var configuration, minR, maxR, minI, maxI, limit, max, plotSize, rowResults, workers;
+    var configuration, minR, maxR, minI, maxI, graphingMethod, limit, max, tolerance, maxPeriod, plotSize, rowResults, workers;
 
     // Cancel any currently running drawing.
     function cancelDrawing() {
@@ -41,13 +41,16 @@
         }
 
         // Post a message to a particular worker to compute the next row of escape values.
-        function computeNextRowAsync(thisWorker) {
+        function computeNextRowAsync(thisWorker) {            
             thisWorker.postMessage({
                 mode: 'computeResult',
                 canvasWidth: width,
                 canvasHeight: height,
+                graphingMethod: graphingMethod,
                 limit: limit,
                 max: max,
+                tolerance: tolerance,
+                maxPeriod: maxPeriod,
                 rowNumber: nextRowNumber,
                 minR: minR,
                 maxR: maxR,
@@ -78,6 +81,12 @@
         maxR = configuration.maxR;
         minI = configuration.minI;
         maxI = configuration.maxI;
+
+        graphingMethod = configuration.graphingMethod;
+
+        // Parameters to the "Perodicity Time" graphing method
+        tolerance = configuration.tolerance;
+        maxPeriod = configuration.maxPeriod;        
 
         // Now that the plot new co-ordinates have been read from the "Proposed New Plot location",
         // update the form to display the new co-ordinates in the "Plot Location"

@@ -36,8 +36,18 @@
     IteratingFunctions.push(new IteratingFunction(105, 'Mandelbrot-7', 'z ^ 7 + c', -2, 2, -2, 2));
     IteratingFunctions.push(new IteratingFunction(106, 'Mandelbrot-8', 'z ^ 8 + c', -2, 2, -2, 2));
 
-    // Twin Laser
+    // Twin Laser and other twists on the basic Mandelbrot
     IteratingFunctions.push(new IteratingFunction(1701, 'Twin Laser', 'z^2.015 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1702, 'Broken Heart', 'z^2 - c * i', -1, 1, -1, 1));
+
+    // Negabrot
+    IteratingFunctions.push(new IteratingFunction(1800, 'Negabrot-2', 'z ^ -2 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1801, 'Negabrot-3', 'z ^ -3 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1802, 'Negabrot-4', 'z ^ -4 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1803, 'Negabrot-5', 'z ^ -5 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1804, 'Negabrot-6', 'z ^ -6 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1805, 'Negabrot-7', 'z ^ -7 + c', -2, 2, -2, 2));
+    IteratingFunctions.push(new IteratingFunction(1806, 'Negabrot-8', 'z ^ -8 + c', -2, 2, -2, 2));    
 
     // Burning Ships
     IteratingFunctions.push(new IteratingFunction(1, 'Burning Ships', '(abs(real(z)) + abs(imag(z)) * i) ^ 2 + c', -2, 2, -2, 2));

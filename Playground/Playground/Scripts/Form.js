@@ -32,7 +32,15 @@ This file contains Javascript to work with the form the user uses to specify wha
         c.maxI = parseFloat(document.getElementById('numNewMaxI').value);
 
         c.automaticMaxIterations = document.getElementById('chkAutomaticMaxIterations').checked;
-
+        
+        c.graphingMethod = (function () {
+            if (document.getElementById("rdoEscapeTime").checked) {
+                return 1;
+            } else if (document.getElementById("rdoPeriodicityTime").checked) {
+                return 2;
+            }
+        }());        
+        
         if (c.automaticMaxIterations) {
             // If the user has checked the box to automatically determine the maximum number of iterations, compute it here.
             // This needs a *lot* of work.  I'm just guessing right now.
@@ -49,7 +57,16 @@ This file contains Javascript to work with the form the user uses to specify wha
         }
         c.numMaxIterations = parseInt(document.getElementById('numMaxIterations').value, 10);
 
-        c.numEscape = parseInt(document.getElementById('numEscape').value, 10);
+        // The number to escape is computed only for the "Escape Time" graphing method, which is #1
+        if (c.graphingMethod === 1) {
+            c.numEscape = parseInt(document.getElementById('numEscape').value, 10);
+        }
+
+        // The tolerance and maximum period are computed only for the "Time to become periodic" graphing method, which is #2.
+        if (c.graphingMethod === 2) {
+            c.tolerance = parseFloat(document.getElementById('numTolerance').value);
+            c.maxPeriod = parseInt(document.getElementById('numMaxPeriod').value, 10);
+        }        
 
         c.fractalId = parseInt($('#selFractal').val(), 10);
         c.textFunction = document.getElementById('txtFunction').value;

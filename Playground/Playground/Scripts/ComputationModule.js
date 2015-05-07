@@ -14,22 +14,26 @@ function getComputationModule() {
             ln = stdlib.Math.log,
             floor = stdlib.Math.floor,
             ceil = stdlib.Math.ceil,
-            heapArray = new stdlib.Int32Array(heap),
+            int32Array = new stdlib.Int32Array(heap),
+            float64Array = new stdlib.Float64Array(heap),
             outR = 0.0,
             outI = 0.0;
-
-        function computeRow(canvasWidth, canvasHeight, limit, max, rowNumber, minR, maxR, minI, maxI) {
+                
+        function computeRow(canvasWidth, canvasHeight, graphingMethod, limit, max, tolerance, maxPeriod, rowNumber, minR, maxR, minI, maxI) {            
             canvasWidth = +canvasWidth;
             canvasHeight = +canvasHeight;
+            graphingMethod = graphingMethod | 0;
             limit = +limit;
             max = max | 0;
+            tolerance = +tolerance;
+            maxPeriod = maxPeriod | 0;
             rowNumber = +rowNumber;
             minR = +minR;
             maxR = +maxR;
             minI = +minI;
             maxI = +maxI;
 
-            var columnNumber = 0.0, zReal = 0.0, zImaginary = 0.0, numberToEscape = 0;
+            var columnNumber = 0.0, zReal = 0.0, zImaginary = 0.0, thisPointValue = 0;
             var columnNumberInt = 0;
 
             // Compute the imaginary part of the numbers that correspond to pixels in this row.            
@@ -40,30 +44,128 @@ function getComputationModule() {
             for (columnNumber = +0; +columnNumber < +canvasWidth; columnNumber = +(+columnNumber + 1.0)) {
                 // Compute the real part of the number for this pixel.
                 zReal = +(((maxR - minR) * +columnNumber) / +canvasWidth + minR);
-                numberToEscape = howManyToEscape(zReal, zImaginary, max, limit) | 0;
+                
+                // Use one of several methods to determine the value for this point based on which graphing method the user selected.
+                if ((graphingMethod|0) == (1|0)) {
+                    thisPointValue = howManyToEscape(zReal, zImaginary, max, limit) | 0;
+                } else if ((graphingMethod | 0) == (2 | 0)) {
+                    thisPointValue = howManyToBePeriodic(zReal, zImaginary, max, tolerance, maxPeriod) | 0;
+                }
+
                 columnNumberInt = columnNumberInt + 1 | 0;
-                heapArray[(columnNumberInt * 4) >> 2] = numberToEscape | 0;
+                int32Array[(columnNumberInt * 4) >> 2] = thisPointValue | 0;
             }
         }
 
+        // Add a complex number to a sequence in memory (this will ordinarily come directly after
+        // the part of the array that stores values computed for each pixel in a row).
+        // Each complex number is two 64 bit floating point values in an array representing the real and complex parts.
+        function saveSequenceItem(r, i, offset) {
+            r = +r;
+            i = +i;
+            offset = offset | 0;
+
+            var startingPositionInMemory = 65536;
+            startingPositionInMemory = startingPositionInMemory >> 3;
+
+            // todo: use proper offset here to account for size of data.
+            float64Array[((startingPositionInMemory + offset) | 0) * 8 >> 3] = +r;
+            float64Array[((startingPositionInMemory + offset + 1) | 0) * 8 >> 3] = i;
+        }
+        
+        function isInSequence(r, i, tolerance, maxPeriod, sequenceLength) {
+            r = +r;
+            i = +i;
+            tolerance = +tolerance;
+            maxPeriod = maxPeriod | 0;
+            sequenceLength = sequenceLength | 0;
+
+            var startingPositionInMemory = 8192;            
+            var startingPositionInSequence = 0;
+            var j = 0, seqR = 0.0, seqI = 0.0, temp = 0, seqRGreater = 0, seqIGreater = 0, diffR = 0.0, diffI = 0.0;
+
+            startingPositionInSequence = ((sequenceLength | 0) - (maxPeriod | 0)) | 0;
+            if ((startingPositionInSequence | 0) < 0) {
+                startingPositionInSequence = 0 | 0;
+            }            
+
+            for (j = startingPositionInSequence | 0; (j | 0) < (sequenceLength | 0) ; j = (j + 1) | 0) {
+                
+                temp = ((startingPositionInMemory | 0) + (j * 2 | 0)) | 0;                                
+                seqR = +float64Array[(temp | 0) * 8 >> 3];
+                seqI = +float64Array[((temp + 1) | 0) * 8 >> 3];
+
+                seqRGreater = seqR > r;
+                diffR = seqRGreater ? seqR - r : r - seqR;
+                if (diffR > tolerance) {
+                    continue;
+                }
+
+                seqIGreater = seqI > i;
+                diffI = seqIGreater ? seqI - i : i - seqI;
+                if (diffI > tolerance) {
+                    continue;
+                }
+
+                return 1 | 0;
+            }
+            return 0 | 0;
+        }
+        
+        // Function to determine how many iterations it takes for the sequence for
+        // a point to be determined to be periodic.
+        // max tells the maximum number of iterations to compute.
+        // tolerance tells how close two floating-point numbers need to be to be considered "equal".
+        function howManyToBePeriodic(r, i, max, tolerance, maxPeriod) {
+            r = +r;
+            i = +i;
+            max = max | 0;
+            tolerance = +tolerance;
+            maxPeriod = maxPeriod | 0;     
+
+            var j = 0;
+            outR = +r;
+            outI = +i;
+            for (j = 0; (j | 0) < (max | 0) ; j = (j + 1) | 0) {
+                // Iterate the function.
+                iteratingFunction(outR, outI, r, i);
+                // Check for infinity - return maximum iterations if infinity encountered.
+                // TODO: Properly check for infinity, but asm.js doesn't seem to like that, so using 1000000 for now.
+                // Uss x != x to check for NaN
+                if (outR != outR | outI != outI | +outR > +1000000 | +outI > +1000000| +outR < +-1000000 | +outI < +-1000000) {
+                    return max | 0;
+                }
+                // Check if we've seen this value before.
+                if (isInSequence(outR, outI, tolerance, maxPeriod, j) | 0) {
+                    return j | 0;
+                }
+                // Add this value to the array of items we've seen in this sequence.
+                saveSequenceItem(outR, outI, (j * 2) | 0);
+            }
+            return max | 0;
+        } // end function howManyToBePeriodic
+
         // Function to determine how many iterations for a point to escape.
+        // This function is called for every point on the plot when we use an "escape-time" algorithm.
+        // max tells the maximum number of iterations to compute.
+        // limit tells the "bailout" number; when an iteration has absolute value greater than this number,
+        // the point is assumed to be outside the fractal set.
         function howManyToEscape(r, i, max, limit) {
             r = +r;
             i = +i;
             max = max | 0;
             limit = +limit;
 
-            var j = 0, ar = 0.0, ai = 0.0;
-            ar = +r;
-            ai = +i;
-            for (j = 0; (j | 0) < (max | 0); j = (j + 1) | 0) {
-                iteratingFunction(ar, ai, r, i)
-                ar = outR;
-                ai = outI;
-                if (+(ar * ar + ai * ai) >= +(limit * limit))
+            var j = 0, limitSquared = 0.0;            
+            outR = +r;
+            outI = +i;
+            limitSquared = +(limit * limit);
+            for (j = 0; (j | 0) < (max | 0) ; j = (j + 1) | 0) {
+                iteratingFunction(outR, outI, r, i)                
+                if (+(outR * outR + outI * outI) >= limitSquared)
                     return j | 0;
             }
-            return j | 0;
+            return max | 0;
         }
 
         // This file is loaded via AJAX and the string below will be replaced with an actual iterating function.

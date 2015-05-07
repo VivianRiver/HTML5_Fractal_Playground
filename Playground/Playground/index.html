@@ -45,6 +45,7 @@
             <ul>
                 <li><a href="#General">General</a></li>
                 <li><a href="#CustomFunction">Custom Function</a></li>
+                <li><a href="#GraphingMethod">Graphing Method</a></li>
                 <li><a href="#Colors">Colors</a></li>
             </ul>
             <div id='General'>
@@ -103,15 +104,7 @@
 
             <div id='CustomFunction'>            
                 Iterating Function: <br />
-                f(z, c) = <input type='text' id='txtFunction' value='z^2 + c' style='width: 500px;' /> <br />
-                <input type='number' id='numEscape' value='2' />
-                <label for='numEscape'>Number to escape</label>
-                <br />
-                <input type='number' id='numMaxIterations' value='200' />
-                <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
-                <br />
-                <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
-                <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
+                f(z, c) = <input type='text' id='txtFunction' value='z^2 + c' style='width: 500px;' /> <br />                
                 <br />        
                 <div class='Section'>
                     Default Plot Location for This Function: <br />            
@@ -133,6 +126,33 @@
                     </div>            
                 </div>
             </div> <!-- end CustomFunction tab -->
+
+            <div id="GraphingMethod">
+                All graphing methods:<br />
+                <input type='number' id='numMaxIterations' value='200' />
+                <label for='numMaxIterations'>Maximum number of iterations to compute.</label>
+                <br />
+                <input type="checkbox" id='chkAutomaticMaxIterations' checked="checked" />
+                <label for="chkAutomaticMaxIterations">Automatically adjust to plot depth?</label>
+                <br />
+                <br />
+                <input type="radio" name="rdoGraphingMethod" id="rdoEscapeTime" value="1" checked="checked" />
+                <label for="rdoEscapeTime">Escape Time</label>
+                <br />
+                <input type='number' id='numEscape' value='2' />
+                <label for='numEscape'>Number to escape</label>
+                <br />
+                <br />
+                <input type="radio" name="rdoGraphingMethod" id="rdoPeriodicityTime" value="2" />
+                <label for="rdoPeriodicityTime">Time to become periodic</label>                
+                <br />
+                <input type="number" id="numTolerance" value="0.00001" step=".0000000001" />
+                <label for="numTolerance">Tolerance</label>
+                <br />
+                <input type="number" id="numMaxPeriod" value="20" />
+                <label for="numMaxPeriod">Maximum Period</label>
+                
+            </div>
 
             <div id="Colors">
                 <input type="color" id='color1' value='#000000' />
