@@ -32,6 +32,11 @@
             oldMinR, oldMaxR, oldMinI, oldMaxI, // the old coordinates in the complex plane
             newMinR, newMaxR, newMinI, newMaxI; // the new coordinates in the complex plane
 
+        // Do not make any selection if the r and i coordinates are not distinct. (This will cause errors.)
+        if (x0 === x1 || y0 === y1) {
+            return;
+        }
+
         // Convert x-coordinate on the canvas to real coordinate in complex plane
         function convertXToR(x, minR, maxR) {
             var diff;
