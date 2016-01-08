@@ -14,7 +14,7 @@
         MULTIPLY = 'MULTIPLY',
         DIVIDE = 'DIVIDE',
         EXPONENT = 'EXPONENT',
-        ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'arg', 'sin', 'cos', 'sh', 'ch', 'exp', 'ln', 'conj'];
+        ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'arg', 'sin', 'cos', 'sh', 'ch', 'exp', 'ln', 'conj', 'gamma'];
 
     // Return an array that parses the output into a sort of ternary tree where the branches of the tree
     // are either an operator and two operands, or a function with a single argument.
@@ -165,7 +165,7 @@
                 }
 
                 // This needs a bit of cleaning up.  I defined a list of these functions elsewhere and the same list should be used here.
-            } else if (mathArray[0] === 'sin' || mathArray[0] === 'cos' || mathArray[0] === 'sh' || mathArray[0] === 'ch' || mathArray[0] === 'exp' || mathArray[0] === 'abs' || mathArray[0] === 'real' || mathArray[0] === 'imag' || mathArray[0] === 'conj') {
+            } else if (mathArray[0] === 'sin' || mathArray[0] === 'cos' || mathArray[0] === 'sh' || mathArray[0] === 'ch' || mathArray[0] === 'exp' || mathArray[0] === 'abs' || mathArray[0] === 'real' || mathArray[0] === 'imag' || mathArray[0] === 'ln' || mathArray[0] === 'conj' || mathArray[0] === 'gamma') {
                 // Single argument functions
                 firstVariableNum = numVariables;
                 numVariables += 1;

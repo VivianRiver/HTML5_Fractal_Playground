@@ -441,6 +441,113 @@ function getComputationModule() {
             outI = +imagPart;
         }
 
+        // Compute the gamma function of a number such that gamma(n + 1) = n! when n is an integer.
+        // Use Neme's approximation: http://math.stackexchange.com/questions/19236/algorithm-to-compute-gamma-function
+        function compute_gamma(z_r, z_i) {
+            z_r = +z_r;
+            z_i = +z_i;
+            var __r0 = 0.0;
+            var __i0 = 0.0;
+            var __r1 = 0.0;
+            var __i1 = 0.0;
+            var __r2 = 0.0;
+            var __i2 = 0.0;
+            var __r3 = 0.0;
+            var __i3 = 0.0;
+            var __r4 = 0.0;
+            var __i4 = 0.0;
+            var __r5 = 0.0;
+            var __i5 = 0.0;
+            var __r6 = 0.0;
+            var __i6 = 0.0;
+            var __r7 = 0.0;
+            var __i7 = 0.0;
+            var __r8 = 0.0;
+            var __i8 = 0.0;
+            var __r9 = 0.0;
+            var __i9 = 0.0;
+            var __r10 = 0.0;
+            var __i10 = 0.0;
+            var __r11 = 0.0;
+            var __i11 = 0.0;
+            var __r12 = 0.0;
+            var __i12 = 0.0;
+            var __r13 = 0.0;
+            var __i13 = 0.0;
+            var __r14 = 0.0;
+            var __i14 = 0.0;
+            var __r15 = 0.0;
+            var __i15 = 0.0;
+            var __r16 = 0.0;
+            var __i16 = 0.0;
+            var __r17 = 0.0;
+            var __i17 = 0.0;
+            var __r18 = 0.0;
+            var __i18 = 0.0;
+            outR = +1;
+            outI = +0;
+            __r4 = +outR;
+            __i4 = +outI;
+            outR = +2;
+            outI = +0;
+            __r5 = +outR;
+            __i5 = +outI;
+            divide(__r4, __i4, __r5, __i5);
+            __r3 = +outR;
+            __i3 = +outI;
+            __r6 = +outR;
+            __i6 = +outI;
+            multiply(__r3, __i3, __r6, __i6);
+            __r2 = +outR;
+            __i2 = +outI;
+            outR = +z_r;
+            outI = +z_i;
+            __r9 = +outR;
+            __i9 = +outI;
+            outR = +0.5;
+            outI = +0;
+            __r10 = +outR;
+            __i10 = +outI;
+            subtract(__r9, __i9, __r10, __i10);
+            __r8 = +outR;
+            __i8 = +outI;
+            __r11 = +outR;
+            __i11 = +outI;
+            multiply(__r8, __i8, __r11, __i11);
+            __r7 = +outR;
+            __i7 = +outI;
+            add(__r2, __i2, __r7, __i7);
+            __r1 = +outR;
+            __i1 = +outI;
+            outR = +z_r;
+            outI = +z_i;
+            __r13 = +outR;
+            __i13 = +outI;
+            outR = +z_r;
+            outI = +z_i;
+            __r15 = +outR;
+            __i15 = +outI;
+            outR = +2;
+            outI = +0;
+            __r17 = +outR;
+            __i17 = +outI;
+            __r18 = +outR;
+            __i18 = +outI;
+            multiply(__r17, __i17, __r18, __i18);
+            __r16 = +outR;
+            __i16 = +outI;
+            divide(__r15, __i15, __r16, __i16);
+            __r14 = +outR;
+            __i14 = +outI;
+            add(__r13, __i13, __r14, __i14);
+            __r12 = +outR;
+            __i12 = +outI;
+            subtract(__r1, __i1, __r12, __i12);
+            __r0 = outR;
+            __i0 = outI;
+            compute_exp(__r0, __i0);
+        }
+
         function get_outR() {
             return +outR;
         }
@@ -478,6 +585,7 @@ function getComputationModule() {
             compute_ch: compute_ch,
             compute_exp: compute_exp,
             compute_ln: compute_ln,
+            compute_gamma: compute_gamma,
             get_outR: get_outR,
             set_outR: set_outR,
             get_outI: get_outI,
