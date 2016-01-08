@@ -33,7 +33,7 @@
         // However, I'm using Firefox asm.js to compile Javascript code to native code,
         // and that doesn't lend itself to me being able to modify the computationModule
         // with the code for the specific iterating equation we're using.                        
-        computationModule = eval('(' + code + '())');        
+        computationModule = eval('(' + code + '())');
     }
 
     function computeResult(data) {

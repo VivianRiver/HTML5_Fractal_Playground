@@ -461,7 +461,8 @@ function getComputationModule() {
             // The primary point-of-entry for the computation module
             computeRow: computeRow,
 
-            // These functions are exposed to make them testable, but they won't normally be directly invoked.
+            // These functions are exposed to make them testable, but they won't normally be directly invoked.            
+            iteratingFunction: iteratingFunction,
             computePower: computePower,
             add: add,
             subtract: subtract,

@@ -1,6 +1,31 @@
 ﻿(function () {
     'use strict';
-    var assert, module;
+    var computationModuleCode, assert, module;
+
+    $.ajax({
+        method: 'GET',
+        url: 'Scripts/ComputationModule.js?version=2.4.0',
+        dataType: 'text',
+        async: false,
+        success: function (response) {            
+            computationModuleCode = response;
+        }
+    });
+
+    function getComputationModule(mathExpression) {        
+        var bufferSize, heap, foreign, mathCode, customModuleCode, computationModule;
+        bufferSize = 65536 * 2;
+        heap = new ArrayBuffer(bufferSize);
+        // This is not unused; it gets read by the eval code below.
+        foreign = {};        
+        mathExpression = mathExpression ? mathExpression : "0";        
+        mathCode = TextFunctionToAsmjs.convert(mathExpression);
+        customModuleCode = computationModuleCode
+            .replace(new RegExp('"ITERATINGFUNCTION"'),
+            "function iteratingFunction(z_r, z_i, c_r, c_i) {\n" + mathCode + "}\n"),                
+        computationModule = eval('(' + customModuleCode + '())');
+        return computationModule;
+    }
 
     assert = (function () {
         function checksOut(computation, expectedr, expectedi) {
@@ -94,4 +119,30 @@
     assert.checksOut(function () { module.compute_ln(1, 0); }, 0, 0);
     assert.checksOut(function () { module.compute_ln(Math.E, 0); }, 1, 0);
     assert.checksOut(function () { module.compute_ln(1, 2); }, 0.80471895621705, 1.10714871779409);
+
+    assert.checksOut(function () {
+        module = getComputationModule("1+2+3");
+        module.iteratingFunction();
+    }, 6, 0);
+
+    assert.checksOut(function () {
+        module = getComputationModule("10-7-2");
+        module.iteratingFunction();
+    }, 2, 0);
+
+    // Check that addition and subtraction operate at equal precedence from left to right.
+    assert.checksOut(function () {
+        module = getComputationModule("10-2+3");
+        module.iteratingFunction();
+    }, 11, 0);
+
+    assert.checksOut(function () {
+        module = getComputationModule("24/8/3");
+        module.iteratingFunction();
+    }, 1, 0);
+
+    assert.checksOut(function () {
+        module = getComputationModule("1+32/2^5-3");
+        module.iteratingFunction();
+    }, -1, 0);
 } ());
