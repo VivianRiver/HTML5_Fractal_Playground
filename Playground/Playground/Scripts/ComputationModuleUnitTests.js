@@ -128,7 +128,7 @@
     assert.checksOut(function () {
         module = getComputationModule("10-7-2");
         module.iteratingFunction();
-    }, 2, 0);
+    }, 1, 0);
 
     // Check that addition and subtraction operate at equal precedence from left to right.
     assert.checksOut(function () {

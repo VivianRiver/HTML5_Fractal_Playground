@@ -7,33 +7,38 @@
 /*jslint browser: true, white: true*/
 
 (function () {
+    debugger;
     'use strict';
-    var textFunctionToAsmjs,
-        ADD = 'ADD',
-        SUBTRACT = 'SUBTRACT',
-        MULTIPLY = 'MULTIPLY',
-        DIVIDE = 'DIVIDE',
-        EXPONENT = 'EXPONENT',
-        ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'arg', 'sin', 'cos', 'sh', 'ch', 'exp', 'ln', 'conj'];
+    var textFunctionToAsmjs,        
+        OPERATORS = [
+            { symbol: "-", precedence: 1 },
+            { symbol: "+", precedence: 1 },
+            { symbol: "/", precedence: 2 },
+            { symbol: "*", precedence: 2 },
+            { symbol: "^", precedence: 3 }
+        ],
+        MIN_OPERATOR_PRECEDENCE = 1,
+        MAX_OPERATOR_PRECEDENCE = 3,
+        ONE_ARG_FUNCTIONS = ['real', 'imag', 'abs', 'arg', 'sin', 'cos', 'sh', 'ch', 'exp', 'ln', 'conj'];    
 
     // Return an array that parses the output into a sort of ternary tree where the branches of the tree
     // are either an operator and two operands, or a function with a single argument.
     // This function operates recursively.
     function parseTextToMathArray(text) {
         function recurse(text) {
-            var index, operator, operand0, operand1, i;
+            var lastIndex, operatorsOfPrecedence, foundOperatorIndex, foundOperator, operand0, operand1, i;
 
             // Search for the substring within the given text.
             // Return the index of the first letter of the first instance of the substring.            
-            function findIndex(toFind, text) {
-                var j, c, numParens;
+            function findLastIndex(toFind, text) {
+                var a = -1, j, c, numParens;
                 numParens = 0;
                 for (j = 0; j < text.length; j += 1) {
                     c = text.substr(j, toFind.length);
                     // The first part of the expression checks for a match.
                     // The second part of the expression checks that we're not looking for subtraction and finding a unary '-' instead.
                     if (c === toFind && numParens === 0 && !(toFind === '-' && (j === 0 || text[j - 1] === '(' || text[j - 1] === '+' || text[j - 1] === '*' || text[j - 1] === '/' || text[j - 1] === '^'))) {
-                        return j;
+                        a = j;
                     }
                     if (c.substr(0, 1) === '(') {
                         numParens += 1;
@@ -41,53 +46,34 @@
                         numParens -= 1;
                     }
                 }
-                return -1;
-            } // end function findIndex
+                return a;
+            } // end function findLastIndex            
 
-            index = findIndex('-', text);
-            if (index > -1) {
-                operator = SUBTRACT;
-                operand0 = text.substr(0, index);
-                operand1 = text.substr(index + 1);
-                return [operator, recurse(operand0), recurse(operand1)];
-            }
+            // Look for operators in the text, not in parenthesis, from lowest precedence to highest precedence.
+            for (i = MIN_OPERATOR_PRECEDENCE; i <= MAX_OPERATOR_PRECEDENCE; i += 1) {              
+                var operatorsOfPrecedence = OPERATORS.filter(function (operator) {
+                    return operator.precedence === i;
+                });
+                // Get the last position in the text at which this operator is found.
+                foundOperatorIndex = operatorsOfPrecedence.reduce(function (previousIndex, operator) {
+                    var lastIndex = findLastIndex(operator.symbol, text);
+                    return lastIndex > previousIndex ? lastIndex : previousIndex;
+                }, -1);
 
-            index = findIndex('+', text);
-            if (index > -1) {
-                operator = ADD;
-                operand0 = text.substr(0, index);
-                operand1 = text.substr(index + 1);
-                return [operator, recurse(operand0), recurse(operand1)];
-            }
-
-            index = findIndex('/', text);
-            if (index > -1) {
-                operator = DIVIDE;
-                operand0 = text.substr(0, index);
-                operand1 = text.substr(index + 1);
-                return [operator, recurse(operand0), recurse(operand1)];
-            }
-
-            index = findIndex('*', text);
-            if (index > -1) {
-                operator = MULTIPLY;
-                operand0 = text.substr(0, index);
-                operand1 = text.substr(index + 1);
-                return [operator, recurse(operand0), recurse(operand1)];
-            }
-
-            index = findIndex('^', text);
-            if (index > -1) {
-                operator = EXPONENT;
-                operand0 = text.substr(0, index);
-                operand1 = text.substr(index + 1);
-                return [operator, recurse(operand0), recurse(operand1)];
+                // If foundOperatorIndex > -1, an operator at this precedence was found.
+                // Recurse on the operands before and after the operator.
+                if (foundOperatorIndex > -1) {
+                    foundOperator = text[foundOperatorIndex];
+                    operand0 = text.substr(0, foundOperatorIndex);
+                    operand1 = text.substr(foundOperatorIndex + 1);
+                    return [foundOperator, recurse(operand0), recurse(operand1)];
+                }                                
             }
 
             // If we didn't find any of the operators, look for the one argument functions
             for (i = 0; i < ONE_ARG_FUNCTIONS.length; i += 1) {
-                index = findIndex(ONE_ARG_FUNCTIONS[i], text);
-                if (index > -1) {
+                lastIndex = findLastIndex(ONE_ARG_FUNCTIONS[i], text);
+                if (lastIndex > -1) {
                     operand0 = text.substr(index + ONE_ARG_FUNCTIONS[i].length, text.length - ONE_ARG_FUNCTIONS[i].length - index * 2);
                     return [ONE_ARG_FUNCTIONS[i], recurse(operand0)];
                 }
@@ -96,9 +82,8 @@
             // If we've made it this far, there isn't a single operation we can perform without going inside parenthesis.
             // This means that this is either a primitive expression (in which case there will be no parenthesis),
             // or this expression contains '(', an expression inside, and then ')', and nothing else.
-
-            index = findIndex('(', text);
-            if (index === 0) {
+            lastIndex = findLastIndex('(', text);
+            if (lastIndex === 0) {
                 return recurse(text.substr(1, text.length - 2));
             }
 
@@ -137,7 +122,7 @@
                 } else if (mathArray === '-i') {
                     result.push('outR = 0.0;\noutI = -1.0;\n');
                 }
-            } else if (mathArray[0] === ADD || mathArray[0] === SUBTRACT || mathArray[0] === MULTIPLY || mathArray[0] === DIVIDE || mathArray[0] === EXPONENT) {
+            } else if (mathArray[0] === "+" || mathArray[0] === "-" || mathArray[0] === "*" || mathArray[0] === "/" || mathArray[0] === "^") {
                 // var var_n;
                 firstVariableNum = numVariables;
                 numVariables += 1;
@@ -152,15 +137,15 @@
                 result.push('__r' + secondVariableNum + ' = +outR;\n');
                 result.push('__i' + secondVariableNum + ' = +outI;\n');
 
-                if (mathArray[0] === ADD) {
+                if (mathArray[0] === "+") {
                     result.push('add(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                } else if (mathArray[0] === SUBTRACT) {
+                } else if (mathArray[0] === "-") {
                     result.push('subtract(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                } else if (mathArray[0] === MULTIPLY) {
+                } else if (mathArray[0] === "*") {
                     result.push('multiply(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                } else if (mathArray[0] === DIVIDE) {
+                } else if (mathArray[0] === "/") {
                     result.push('divide(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
-                } else if (mathArray[0] === EXPONENT) {                    
+                } else if (mathArray[0] === "^") {
                     result.push('computePower(__r' + firstVariableNum + ', __i' + firstVariableNum + ', __r' + secondVariableNum + ', __i' + secondVariableNum + ');\n');
                 }
 
