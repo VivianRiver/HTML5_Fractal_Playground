@@ -6,8 +6,7 @@
 // jslint directive
 /*jslint browser: true, white: true*/
 
-(function () {
-    debugger;
+(function () {    
     'use strict';
     var textFunctionToAsmjs,        
         OPERATORS = [
@@ -74,7 +73,7 @@
             for (i = 0; i < ONE_ARG_FUNCTIONS.length; i += 1) {
                 lastIndex = findLastIndex(ONE_ARG_FUNCTIONS[i], text);
                 if (lastIndex > -1) {
-                    operand0 = text.substr(index + ONE_ARG_FUNCTIONS[i].length, text.length - ONE_ARG_FUNCTIONS[i].length - index * 2);
+                    operand0 = text.substr(lastIndex + ONE_ARG_FUNCTIONS[i].length, text.length - ONE_ARG_FUNCTIONS[i].length - lastIndex * 2);
                     return [ONE_ARG_FUNCTIONS[i], recurse(operand0)];
                 }
             }
@@ -150,7 +149,7 @@
                 }
 
                 // This needs a bit of cleaning up.  I defined a list of these functions elsewhere and the same list should be used here.
-            } else if (mathArray[0] === 'sin' || mathArray[0] === 'cos' || mathArray[0] === 'sh' || mathArray[0] === 'ch' || mathArray[0] === 'exp' || mathArray[0] === 'abs' || mathArray[0] === 'real' || mathArray[0] === 'imag' || mathArray[0] === 'conj') {
+            } else if (ONE_ARG_FUNCTIONS.indexOf(mathArray[0] > -1)) {
                 // Single argument functions
                 firstVariableNum = numVariables;
                 numVariables += 1;
@@ -182,8 +181,6 @@
 
         asmjsCode = argumentTypeDeclarations + variableDeclarations + computationCode;
         return asmjsCode;
-
-
     }
 
     // Convert a textual mathematics expression to asm.js code.
