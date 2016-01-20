@@ -1,6 +1,43 @@
 ﻿(function () {
     'use strict';
-    var assert, module;
+    var computationModuleCode, assert, module;
+
+    $.ajax({
+        method: 'GET',
+        url: 'Scripts/ComputationModule.js?version=2.4.0',
+        dataType: 'text',
+        async: false,
+        success: function (response) {            
+            computationModuleCode = response;
+        }
+    });
+
+    function getComputationModule(mathExpression) {        
+        var bufferSize, heap, foreign, mathCode, customModuleCode, computationModule;
+        bufferSize = 65536 * 2;
+        heap = new ArrayBuffer(bufferSize);
+        // This is not unused; it gets read by the eval code below.
+        foreign = {};        
+        mathExpression = mathExpression ? mathExpression : "0";        
+        mathCode = TextFunctionToAsmjs.convert(mathExpression);
+        customModuleCode = computationModuleCode
+            .replace(new RegExp('"ITERATINGFUNCTION"'),
+            "function iteratingFunction(z_r, z_i, c_r, c_i) {\n" + mathCode + "}\n"),                
+        computationModule = eval('(' + customModuleCode + '())');
+        return computationModule;
+    }
+
+    function log(message) {
+        document.writeln('<div>' + message + '</div>');
+    }
+
+    function checkComputation(text, resultR, resultI) {
+        log(text + " = " + resultR + " + " + resultI + "i");
+        assert.checksOut(function () {
+            module = getComputationModule(text);
+            module.iteratingFunction();
+        }, resultR, resultI);
+    }
 
     assert = (function () {
         function checksOut(computation, expectedr, expectedi) {
@@ -27,11 +64,7 @@
             } else {
                 error('assert.areCloseEnough failed, expected: ' + expectedr + ' + ' + expectedi + ' i, actual: ' + actualr + ' + ' + actuali + ' i');
             }
-        }
-
-        function log(message) {
-            document.writeln('<div>' + message + '</div>');
-        }
+        }        
 
         function error(message) {
             document.writeln('<div style="color:red;">' + message + '</div>');
@@ -94,4 +127,23 @@
     assert.checksOut(function () { module.compute_ln(1, 0); }, 0, 0);
     assert.checksOut(function () { module.compute_ln(Math.E, 0); }, 1, 0);
     assert.checksOut(function () { module.compute_ln(1, 2); }, 0.80471895621705, 1.10714871779409);
+
+    checkComputation("1+2+3", 6, 0);
+    // Check that addition and subtraction operate at equal precedence from left to right.
+    checkComputation("10-7-2", 1, 0);
+    checkComputation("10-2+3", 11, 0);
+    checkComputation("24/8/3", 1, 0);
+    checkComputation("1+32/2^5-3", -1, 0);
+    // Pythagorean identity
+    checkComputation("(sin(5))^2 + (cos(5))^2", 1, 0);
+    // sin(x) = sin (x + 2*Pi)
+    checkComputation("sin(5+i) - sin(5+i+2*3.14159265358979323)", 0, 0);
+
+    checkComputation("ln(5)", 1.6094379124341003746007593332262, 0);
+
+    checkComputation("2.718281828459045 ^ ln(5)", 5, 0);
+
+
+    // TODO: Check computations with parenthesis for correct order of operations
+
 } ());
