@@ -142,4 +142,8 @@
     checkComputation("ln(5)", 1.6094379124341003746007593332262, 0);
 
     checkComputation("2.718281828459045 ^ ln(5)", 5, 0);
+
+
+    // TODO: Check computations with parenthesis for correct order of operations
+
 } ());
