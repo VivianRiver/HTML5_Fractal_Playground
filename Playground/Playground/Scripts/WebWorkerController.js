@@ -104,7 +104,7 @@
         for (i = 0; i < farmSize; i += 1) {
             (function () {
                 var worker;
-                worker = new Worker('scripts/computer.js');
+                worker = new Worker('Scripts/computer.js');
                 nextRowNumber += 1;
                 // When we get a message back from the web worker, we expect that it contains the howManyToEscape values
                 // for a row of pixels in the canvas.
