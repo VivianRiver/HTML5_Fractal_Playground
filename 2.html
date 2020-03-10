@@ -1,0 +1,89 @@
+
+<!DOCTYPE HTML>
+
+<html>
+<head>
+	<title>Daniel Langdon's Home on the Web</title>
+    <style type='text/css'>
+        .codeDiv { padding: 1em; }
+        textarea{ background-color:Lime;}
+    </style>
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+  m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-28009448-1', 'danielsadventure.info');
+    ga('send', 'pageview');
+
+</script>
+
+<style type='text/css'>
+
+	img { padding: 1em; }
+
+</style>
+
+</head>
+
+<body>
+    
+    <h1>HTML5 Fractal Playground 1.3, May 17, 2014</h1>
+    <p>
+        I have had some more time to tinker with and tune my "HTML5 Fractal Playground" project.  My newer work mostly focuses on the user interface,
+        though I did add two new iterating functions.        
+    </p>
+
+    <ul>
+        <li>
+            I moved most of the options into a jQuery-UI dialog.  I provide buttons for most common operations along with keyboard shortcuts.
+        </li>
+        <li>
+            I added a [Fullscreen] button that allows the application to run fullscreen with HTML5.
+        </li>
+        <li>
+            I added another open-source library called "core-estimator".  This library estimates the number of cores in your CPU to optimize the
+            parallel computations.  The only drawback is that it takes a while to load, especially with Internet Explorer.
+        </li>
+        <li>
+            I added an experimental hash URL system that allows for specific locations within a fractal to be bookmarked.  However, please don't count
+            on URLs in this version to work with future versions.  I might need to change something to add new functionality.  Please consider this
+            feature experimental for the time being.
+        </li>
+        <li>
+            With the hash URL syntax, you should be able to use the back button in the browser to return to a previously drawn fractal.
+            There is a known issue with this: you must wait for each fractal to draw, or else the program will try to draw two fractals at once.
+            I expect to fix this in the next version.
+        </li>
+    </ul>
+
+    <h2>
+        On to <a href='/html5fractal'>HTML5 Fractal Playground</a>
+    </h2>
+
+    <p>
+        Assuming that a future version doesn't change the hash URL syntax, you can click on the pictures below to draw them in HTML5 Fractal Playground.
+    </p>
+
+    <p>
+        <a href='http://danielsadventure.info/html5fractal/#6,-1,1,-1,1,2,683,true'>f(z) = sin(z / c)</a><br />
+        <img alt='Sine Fractal' src='sine.png' />
+    </p>
+
+    <p>
+        <a href='http://danielsadventure.info/html5fractal/#7,-2,2,-2,2,2,341,true'>f(z) = cos(z / c)</a><br />
+        <img alt='Sine Fractal' src='cosine.png' />
+    </p>
+
+    <p>
+        <a href='http://danielsadventure.info/html5fractal/#6,0.020820277652504673,0.022544973529230808,0.7509721478966416,0.7526968437733677,2,4164,true'>Deep zoom on f(z) = sin(z / c)</a><br />
+        <img alt='Sine Zoom' src="sinezoom.png" />
+
+
+    </p>
+        
+</body>
+</html>

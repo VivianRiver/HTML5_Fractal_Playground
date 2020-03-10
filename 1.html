@@ -1,0 +1,88 @@
+﻿
+<!DOCTYPE HTML>
+
+<html>
+<head>
+	<title>Daniel Langdon's Home on the Web</title>
+    <style type='text/css'>
+        .codeDiv { padding: 1em; }
+        textarea{ background-color:Lime;}
+    </style>
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+  m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-28009448-1', 'danielsadventure.info');
+    ga('send', 'pageview');
+
+</script>
+
+<style type='text/css'>
+
+	img { padding: 1em; }
+
+</style>
+
+</head>
+
+<body>
+    
+    <h1>HTML5 Fractal Playground 1.1, April 6, 2014</h1>
+    <p>
+        Last month, I wrote about a new personal open-source project that I just put out called "HTML5 Fractal Playground".  In the intervening days, I have had time to tinker 
+        with the program some more and I've added some features that will be important for anyone who wants to use the program to learn about fractals.
+    </p>
+
+    <ul>
+        <li>
+            I fixed a bug that prevented Firefox's asm.js from properly optimizing the speed of the computations whenever the size of the plot
+            is not a power of two.
+        </li>
+        <li>
+            I added an HTML5 progress widget that displays the progress of performing the computations so that the user isn't staring at a blank
+            plot while waiting for long-running computations to take place.
+        </li>
+        <li>
+            I added an option to allow the maximum number of iterations to compute to increase as you zoom in on the fractal.  This is probably
+            the single best thing I've added because it allows you to easily zoom in and see much more detail than you normally would in the
+            first version.
+        </li>
+        <li>
+            Finally, I completely revamped the way that colors are chosen to correspond with different escape iterations.  In the first version,
+            any point that escaped in one iteration was black, and any point that more than about 50 iterations to escape was bright blue, and
+            any point inside the fractal was black.  In the new version, the colors are chosen so that they are relative to the maximum and
+            minimum number of iterations to escape found for the chosen coordinates.
+        </li>
+    </ul>
+
+    <p>
+        I think that I have the functionality to draw the fractals working very well, and so for the next version, I would like to improve
+        the user interface.  I like that I have written this so that the user can modify the code that computes the fractal, but I do
+        recognize that this is too advanced for most users.  I would like to offer the user the option to select from a number of fractals
+        from a drop-down list or the like.  I also would like to put most of the controls in a dialog box so that that can be shown and
+        hidden, instead of the user having to scroll up and down.
+    </p>
+
+    <p>
+        Finally, I would like to eventually introduce other ways of coloring the plot.
+    </p>
+
+    <h2>
+        On to <a href='/html5fractal'>HTML5 Fractal Playground</a>
+    </h2>
+
+    <p>
+        A deep zoom on the following coordinates rendered this image which would not have been feasible with the previous version: <br />
+        Minimum Real Part: -0.15295470977798267<br />
+        Maximum Real Part: -0.15286695268191625<br />
+        Minimum Imaginary Part: -1.0389919858899233<br />
+        Maximum Imaginary Part: -1.0389042287938568<br />
+        <img alt='example plot' src='example-1.1.png' />
+    </p>
+        
+</body>
+</html>
